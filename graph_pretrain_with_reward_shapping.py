@@ -5,6 +5,14 @@ import numpy as np
 import tensorflow as tf
 #import tensorflow as tf№from tensorflow.python import debug as tf_debug
 
+
+REWARD_FOR_KILLING = 100
+REWARD_FOR_KILLING_YOURSELF = -100
+REWARD_FOR_INCREASING_CAN_KICK = 10
+REWARD_FOR_INCREASING_AMMO = 10
+REWARD_FOR_INCREASING_BLAST_POWER = 10
+REWARD_FOR_DESTROING_WOODEN_WALL = 20
+
 # contain dictionary which describe current bombs on field
 list_of_sest_boobms = [[],[],[],[]] 
 #contain dictionary of dead agent, coordinates of bombs which kill them and flag 'was dead on privius step'
@@ -58,11 +66,12 @@ def init_list_of_vertex(board):
     return vertex_name, vertex_list
 
 
-def check_next_to_bomb(graph, agent_num, current_state, privius_vertex_name):
+def check_next_to_bomb(graph, agent_num, current_state, privius_vertex_name, reward):
     for bomb in list_of_sest_boobms[agent_num]:
         bomb['blast strength'] = current_state[bomb['x'] + 23, bomb['y']]
         bomb['life'] = current_state[bomb['x'] + 1, bomb['y']]
         if (int(bomb['life']) == 1):
+            # booom
             for key, val in privius_vertex_name.items():
                 item_x = key // 11
                 item_y = key % 11
@@ -70,6 +79,7 @@ def check_next_to_bomb(graph, agent_num, current_state, privius_vertex_name):
                 if val in [0, 1, 2, 3] :
                     item_x, item_y = coordinate_of_adgent[val]
 
+                # check is this item will be killed by bomb
                 if ((bomb['x'] - bomb['blast strength'] < item_x < bomb['x'] + bomb['blast strength']) and (
                         item_y == bomb['y'])) or \
                         ((bomb['y'] - bomb['blast strength'] < item_y < bomb['y'] + bomb['blast strength']) and (
@@ -82,6 +92,9 @@ def check_next_to_bomb(graph, agent_num, current_state, privius_vertex_name):
                                      'y':bomb['y'],
                                      'was dead on privius step': False
                         }
+                        reward += REWARD_FOR_KILLING
+                        # learn that agent, which was killed should avoid this bomb
+                        graph[val, int(bomb['x']) * 11 + int(bomb['y'])] = -100
 
                     # kill yourself
                     if val == agent_num:
@@ -90,23 +103,34 @@ def check_next_to_bomb(graph, agent_num, current_state, privius_vertex_name):
                                        'y': bomb['y'],
                                        'was dead on privius step': False
                         }
+                        reward += REWARD_FOR_KILLING_YOURSELF
 
-                        # destroy wooden wall
+                        # learn that agent, which was killed should avoid this bomb
+                        graph[val, int(bomb['x']) * 11 + int(bomb['y'])] = -100
+
+                    # destroy wooden wall
                     if val == 'wooden wall':
                         print(agent_num, " destroyed wooden wall")
-
+                        reward += REWARD_FOR_DESTROING_WOODEN_WALL
+            # delete bomb after booom
             list_of_sest_boobms[agent_num].remove(bomb)
-    return graph
+
+    return graph, reward
 
 
 def reward_shaping(graph, current_state, privius_state, agent_num):
     coordinate_of_adgent[agent_num] = (int(current_state[0, 0]), int(current_state[0, 1]))
+
     privius_state = np.asmatrix(privius_state).reshape(38, 11)
     current_state = np.asmatrix(current_state).reshape(38, 11)
+
     current_vertex_name, current_vertex_list = init_list_of_vertex(current_state[12:23])
     privius_vertex_name, privius_vertex_list = init_list_of_vertex(privius_state[12:23])
+
     privius_x = int(privius_state[0,0])
     privius_y = int(privius_state[0,1])
+
+    reward = 0
 
     # on privius state agent lay bomb
     if privius_state[37, 0] == 5:
@@ -127,18 +151,21 @@ def reward_shaping(graph, current_state, privius_state, agent_num):
     if privius_state[34, 0] < current_state[34, 0]:
         print(agent_num, " increase can kick")
         graph[agent_num, privius_x * 11 + privius_y] = 10 # set edge between can kick power up and adjent as 10
+        reward += REWARD_FOR_INCREASING_CAN_KICK
 
     # increase ammo
     if privius_state[35, 0] < current_state[35, 0]:
         print(agent_num, " increase ammo")
         graph[agent_num, privius_x * 11 + privius_y] = 10  # set edge between increase ammo power up and adjent as 10
+        reward += REWARD_FOR_INCREASING_AMMO
 
     # increase blast power
     if privius_state[36, 0] < current_state[36, 0]:
         print(agent_num, " increase blast power")
         graph[agent_num, privius_x * 11 + privius_y] = 10  # set edge between blast power power up and adjent as 10
+        reward += REWARD_FOR_INCREASING_BLAST_POWER
 
-    graph = check_next_to_bomb(graph, agent_num, current_state, privius_vertex_name)
+    graph, reward = check_next_to_bomb(graph, agent_num, current_state, privius_vertex_name, reward)
 
 
     # has died
