@@ -120,7 +120,6 @@ def main():
 	                        batch_size=1,
 	                        num_epochs=None,
 	                        shuffle=True)
-
 	                    # estimator_nn1.train(
 	                    #     input_fn=train_input_NN1,
 	                    #     steps=200,
@@ -131,7 +130,8 @@ def main():
 	                    #     steps=200,
 	                    #     hooks=[logging_hook_nn2])
 	                    # predictions = estimator_nn2.predict(input_fn=train_input_NN2)
-	                    #next_action = np.array(list(p['classes'] for p in predictions))
+	                    # next_action = np.array(list(p['classes'] for p in predictions))
+	                    
 	            pr_pr_action = pr_action
 	            pr_action = actions
 	            

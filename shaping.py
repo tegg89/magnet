@@ -84,7 +84,7 @@ def check_next_to_bomb(graph, agent_num, current_state, privius_vertex_name, rew
                         print(agent_num, " kill ", val)
                         killed[val]={'x':bomb['x'],
                                      'y':bomb['y'],
-                                     'was dead on privius step': False
+                                     'was dead on previous step': False
                         }
                         reward += REWARD_FOR_KILLING
                         # learn that agent, which was killed should avoid this bomb
@@ -95,7 +95,7 @@ def check_next_to_bomb(graph, agent_num, current_state, privius_vertex_name, rew
                         print(agent_num, " kill itself")
                         killed[val] = {'x': bomb['x'],
                                        'y': bomb['y'],
-                                       'was dead on privius step': False
+                                       'was dead on previous step': False
                         }
                         reward += REWARD_FOR_KILLING_YOURSELF
 
@@ -137,7 +137,7 @@ def reward_shaping(graph, curr_state, prev_state, agent_num):
                     list_of_sest_boobms[agent_num].append({'x' : bomb_x,
                                                            'y' : bomb_y,
                                                            'life' : curr_state[bomb_x + 1, bomb_y],
-                                                            'blast strength' : curr_state[bomb_x + 23, bomb_y]})
+                                                           'blast strength' : curr_state[bomb_x + 23, bomb_y]})
                     # add list of [x, y, bomb life, boobm blast strength]
 
 
@@ -163,9 +163,9 @@ def reward_shaping(graph, curr_state, prev_state, agent_num):
 
 
     # has died
-    if agent_num in killed and not killed[agent_num]['was dead on privius step']:
+    if agent_num in killed and not killed[agent_num]['was dead on previous step']:
         print(agent_num, " has dead")
-        killed[agent_num]['was dead on privius step'] = 'True'
+        killed[agent_num]['was dead on previous step'] = 'True'
         return graph
 
     return graph

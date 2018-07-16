@@ -43,6 +43,7 @@ For the experiment, we will use [Pommerman](https://www.pommerman.com) environme
 - [x] Attach self-attention module at the graph generation
 - [ ] Substitute execution stage to Nervenet
 - [ ] Compare with random and heuristic agents
+- [ ] Redraw network structure
 - [ ] Prepare arXiv paper
 
 
