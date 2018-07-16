@@ -78,7 +78,7 @@ def main():
 	        done = False
 	        curr_state = None
 	        prev_state = None
-	        graph = np.random.rand(4, 30).astype("float32") + 0.0001
+	        graph = np.random.rand(4, 120).astype("float32") + 0.0001
 	#         print(graph)
 	        pr_action = None
 	        pr_pr_action = None

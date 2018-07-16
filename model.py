@@ -113,7 +113,7 @@ def model_NN1(features, labels, mode):
     dropout = tf.layers.dropout(inputs=dec, rate=0.4, training=mode == tf.estimator.ModeKeys.TRAIN)
     # print('dropout', dropout) #(1, 120, 1024)
 
-    logits = tf.layers.dense(inputs=dropout, units=120) # shape of matrix -- 30 * 4
+    logits = tf.layers.dense(inputs=dropout, units=480) # shape of matrix -- 120 * 4
 
     predictions = {
         "classes": tf.argmax(input=logits, axis=1),
