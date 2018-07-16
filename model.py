@@ -7,29 +7,29 @@ def model_NN1(features, labels, mode):
     # implementation of NN with 3 inputs: https://stackoverflow.com/questions/40318457/how-to-build-a-multiple-input-graph-with-tensor-flow
 
     # First state preprocessing
-    input_layer_state1 = tf.reshape(features["state1"], [-1, 49, 11, 1])
+    input_layer_state1 = tf.reshape(features["state1"], [-1, 38, 11, 1])
     conv1_state1 = tf.layers.conv2d(
         inputs=input_layer_state1,
         filters=32,
         kernel_size=[5, 5],
         padding="same",
         activation=tf.nn.relu)
-    # Output Tensor Shape: [batch_size, 49, 11, 32]
+    # Output Tensor Shape: [batch_size, 38, 11, 32]
     pool1_state1 = tf.layers.max_pooling2d(inputs=conv1_state1, pool_size=[2, 2], strides=2)
-    # Output Tensor Shape: [batch_size, 24, 6, 32]
+    # Output Tensor Shape: [batch_size, 19, 6, 32]
     conv2_state1 = tf.layers.conv2d(
         inputs=pool1_state1,
         filters=64,
         kernel_size=[5, 5],
         padding="same",
         activation=tf.nn.relu)
-    # Output Tensor Shape: [batch_size, 24, 5, 64]
+    # Output Tensor Shape: [batch_size, 9, 5, 64]
     pool2_state1 = tf.layers.max_pooling2d(inputs=conv2_state1, pool_size=[2, 2], strides=2)
-    pool2_flat_state1 = tf.reshape(pool2_state1, [-1, 12 * 2 * 64])
+    pool2_flat_state1 = tf.reshape(pool2_state1, [-1, 9 * 2 * 64])
 
     # Second state preprocessing
     # Outputs equal to state1
-    input_layer_state2 = tf.reshape(features["state2"], [-1, 49, 11, 1])
+    input_layer_state2 = tf.reshape(features["state2"], [-1, 38, 11, 1])
     conv1_state2 = tf.layers.conv2d(
         inputs=input_layer_state2,
         filters=32,
@@ -45,9 +45,9 @@ def model_NN1(features, labels, mode):
         activation=tf.nn.relu)
 
     pool2_state2 = tf.layers.max_pooling2d(inputs=conv2_state2, pool_size=[2, 2], strides=2)
-    pool2_flat_state2 = tf.reshape(pool2_state2, [-1, 12 * 2 * 64])
+    pool2_flat_state2 = tf.reshape(pool2_state2, [-1, 9 * 2 * 64])
 
-    whole_model = tf.concat([pool2_flat_state2, pool2_flat_state1], 1) # (1,3072)
+    whole_model = tf.concat([pool2_flat_state2, pool2_flat_state1], 1)
     
     dense = tf.layers.dense(inputs=whole_model, units=1024, activation=tf.nn.relu) #(1, 1024)
 
@@ -111,7 +111,7 @@ def model_NN1(features, labels, mode):
     
     # Output Tensor Shape: [batch_size, 1024]
     dropout = tf.layers.dropout(inputs=dec, rate=0.4, training=mode == tf.estimator.ModeKeys.TRAIN)
-    print('dropout', dropout) #(1, 120, 1024)
+    # print('dropout', dropout) #(1, 120, 1024)
 
     logits = tf.layers.dense(inputs=dropout, units=120) # shape of matrix -- 30 * 4
 
@@ -123,20 +123,17 @@ def model_NN1(features, labels, mode):
     if mode == tf.estimator.ModeKeys.PREDICT:
         return tf.estimator.EstimatorSpec(mode=mode, predictions=predictions)
     
-    print('labels', labels, 'logits', logits) #labels: (1,120), logits: (1,120,120)
+    # print('labels', labels, 'logits', logits) #labels: (1,120), logits: (1,120,120)
     
     loss = tf.losses.mean_squared_error(labels=labels, predictions=logits)
 
     if mode == tf.estimator.ModeKeys.TRAIN:
         optimizer = tf.train.GradientDescentOptimizer(learning_rate=0.001)
-        train_op = optimizer.minimize(
-            loss=loss,
-            global_step=tf.train.get_global_step())
+        train_op = optimizer.minimize(loss=loss, global_step=tf.train.get_global_step())
         return tf.estimator.EstimatorSpec(mode=mode, loss=loss, train_op=train_op)
 
     eval_metric_ops = {
-        "accuracy": tf.metrics.accuracy(
-            labels=labels, predictions=predictions["classes"])}
+        "accuracy": tf.metrics.accuracy(labels=labels, predictions=predictions["classes"])}
 
     return tf.estimator.EstimatorSpec(mode=mode, loss=loss, eval_metric_ops=eval_metric_ops)
 
@@ -146,7 +143,7 @@ def model_NN2(features, labels, mode):
     # implementation of NN with 3 inputs: https://stackoverflow.com/questions/40318457/how-to-build-a-multiple-input-graph-with-tensor-flow
 
     # First state preprocessing
-    input_layer_state1 = tf.reshape(features["state1"], [-1, 49, 11, 1])
+    input_layer_state1 = tf.reshape(features["state"], [-1, 38, 11, 1])
     conv1_state1 = tf.layers.conv2d(
         inputs=input_layer_state1,
         filters=32,
@@ -161,10 +158,10 @@ def model_NN2(features, labels, mode):
         padding="same",
         activation=tf.nn.relu)
     pool2_state1 = tf.layers.max_pooling2d(inputs=conv2_state1, pool_size=[2, 2], strides=2)
-    pool2_flat_state1 = tf.reshape(pool2_state1, [-1, 12 * 2 * 64])
+    pool2_flat_state1 = tf.reshape(pool2_state1, [-1, 9 * 2 * 64])
 
     # Graph preprocessing
-    input_layer = tf.reshape(features["graph"], [-1, 4, 30, 1])
+    input_layer = tf.reshape(features["graph"], [-1, 4, 120, 1])
     conv1 = tf.layers.conv2d(
         inputs=input_layer,
         filters=32,
@@ -178,13 +175,12 @@ def model_NN2(features, labels, mode):
         kernel_size=[5, 5],
         padding="same",
         activation=tf.nn.relu)
-    conv2_flat = tf.reshape(conv2, [-1, 2 * 15 * 64])
+    conv2_flat = tf.reshape(conv2, [-1, 4 * 30 * 64])
 
     whole_model = tf.concat([pool2_flat_state1, conv2_flat], 1)
 
     dense = tf.layers.dense(inputs=whole_model, units=1024, activation=tf.nn.relu)
-    dropout = tf.layers.dropout(
-        inputs=dense, rate=0.4, training=mode == tf.estimator.ModeKeys.TRAIN)
+    dropout = tf.layers.dropout(inputs=dense, rate=0.4, training=mode == tf.estimator.ModeKeys.TRAIN)
     logits = tf.layers.dense(inputs=dropout, units=10)
 
     predictions = {
@@ -203,9 +199,7 @@ def model_NN2(features, labels, mode):
     # Configure the Training Op (for TRAIN mode)
     if mode == tf.estimator.ModeKeys.TRAIN:
         optimizer = tf.train.GradientDescentOptimizer(learning_rate=0.001)
-        train_op = optimizer.minimize(
-            loss=loss,
-            global_step=tf.train.get_global_step())
+        train_op = optimizer.minimize(loss=loss, global_step=tf.train.get_global_step())
         return tf.estimator.EstimatorSpec(mode=mode, loss=loss, train_op=train_op)
 
     if mode == tf.estimator.ModeKeys.PREDICT:
