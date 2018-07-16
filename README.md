@@ -10,6 +10,13 @@ The goal of this project is controlling multi-agents using graph neural networks
 For the experiment, we will use [Pommerman](https://www.pommerman.com) environment. This has relatively strict constraints on environment settings and simple to deploy algorithms.
 
 
+## TODO
+- [ ] Attach self-attention module at the graph generation
+- [ ] Substitute execution stage to Nervenet
+- [ ] Compare with random and heuristic agents
+- [ ] Prepare arXiv paper
+
+
 ## References
 
 * [Graph Attention Networks](https://arxiv.org/abs/1710.10903)
@@ -18,3 +25,6 @@ For the experiment, we will use [Pommerman](https://www.pommerman.com) environme
 * [Curiosity-driven exploration by self-supervised prediction](https://arxiv.org/abs/1705.05363)
 * [PlayGround: AI research into multi-agent learning](https://github.com/MultiAgentLearning/playground)
 * [Zero-shot task generalization with multi-task deep reinforcement learning](https://arxiv.org/abs/1706.05064)
+
+## License
+Apache
