@@ -121,21 +121,21 @@ def model_NN1(features, labels, mode):
     }
 
     if mode == tf.estimator.ModeKeys.PREDICT:
-        return tf.estimator.EstimatorSpec(mode=mode, predictions=predictions)
-    
+        spec = tf.estimator.EstimatorSpec(mode=mode, predictions=predictions)
     # print('labels', labels, 'logits', logits) #labels: (1,120), logits: (1,120,120)
-    
-    loss = tf.losses.mean_squared_error(labels=labels, predictions=logits)
+    else:
+        loss = tf.losses.mean_squared_error(labels=labels, predictions=logits)
 
     if mode == tf.estimator.ModeKeys.TRAIN:
         optimizer = tf.train.GradientDescentOptimizer(learning_rate=0.001)
         train_op = optimizer.minimize(loss=loss, global_step=tf.train.get_global_step())
-        return tf.estimator.EstimatorSpec(mode=mode, loss=loss, train_op=train_op)
+        spec = tf.estimator.EstimatorSpec(mode=mode, loss=loss, train_op=train_op)
+    else:
+        eval_metric_ops = {
+            "accuracy": tf.metrics.accuracy(labels=labels, predictions=predictions["classes"])}
+        spec = tf.estimator.EstimatorSpec(mode=mode, loss=loss, eval_metric_ops=eval_metric_ops)
 
-    eval_metric_ops = {
-        "accuracy": tf.metrics.accuracy(labels=labels, predictions=predictions["classes"])}
-
-    return tf.estimator.EstimatorSpec(mode=mode, loss=loss, eval_metric_ops=eval_metric_ops)
+    return spec
 
 def model_NN2(features, labels, mode):
     # Implement 2 seperate preprocessing of state and graph and combine them together
@@ -189,20 +189,20 @@ def model_NN2(features, labels, mode):
     }
 
     if mode == tf.estimator.ModeKeys.PREDICT:
-        return tf.estimator.EstimatorSpec(mode=mode, predictions=predictions)
-
-    onehot_labels = tf.one_hot(indices=tf.cast(labels, tf.int32), depth=10)
-#     print('H')
-    loss = tf.losses.softmax_cross_entropy(onehot_labels=onehot_labels, logits=logits)
+        spec = tf.estimator.EstimatorSpec(mode=mode, predictions=predictions)
+    else:
+        onehot_labels = tf.one_hot(indices=tf.cast(labels, tf.int32), depth=10)
+        loss = tf.losses.softmax_cross_entropy(onehot_labels=onehot_labels, logits=logits)
 #     print(loss.shape, onehot_labels.shape)
 
     # Configure the Training Op (for TRAIN mode)
     if mode == tf.estimator.ModeKeys.TRAIN:
         optimizer = tf.train.GradientDescentOptimizer(learning_rate=0.001)
         train_op = optimizer.minimize(loss=loss, global_step=tf.train.get_global_step())
-        return tf.estimator.EstimatorSpec(mode=mode, loss=loss, train_op=train_op)
+        spec = tf.estimator.EstimatorSpec(mode=mode, loss=loss, train_op=train_op)
+    elif mode == tf.estimator.ModeKeys.PREDICT:
+        spec = tf.estimator.EstimatorSpec(mode=mode, loss=loss, predictions=predictions["classes"])
+    else:
+        spec = tf.estimator.EstimatorSpec(mode=mode, loss=loss, predictions=predictions)
 
-    if mode == tf.estimator.ModeKeys.PREDICT:
-        return tf.estimator.EstimatorSpec(mode=mode, loss=loss, predictions=predictions["classes"])
-
-    return tf.estimator.EstimatorSpec(mode=mode, loss=loss, predictions=predictions)
+    return spec

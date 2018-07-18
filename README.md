@@ -3,6 +3,12 @@
 * This project is built during '[Deep Learning Jeju Camp](http://jeju.dlcamp.org)' in 2018.
 * This project is currently under construction. 
 
+
+## Authors
+
+Tegg Taekyong Sung, Aleksandra Malysheva
+
+
 ## Objective
 
 The goal of this project is controlling multi-agents using graph neural networks. Multi-agent scenarios are usually sparsely rewarded. Graph neural networks have an advantage that each node can be trained robustly. With this property, we hypothesized that each agent in an environment can be controlled individually. Since there have been many research papers related to graph neural networks, we would like to apply it to reinforcement learning.
@@ -31,7 +37,6 @@ For the experiment, we will use [Pommerman](https://www.pommerman.com) environme
   <img src="https://github.com/tegg89/DLCamp_Jeju2018/blob/master/asset/pommerman.png?raw=true" width=60% title="pommerman">
 </p>
 
-
 #### 2. Results
 <p align="center">
   <img src="https://github.com/tegg89/DLCamp_Jeju2018/blob/master/asset/prev_result.png?raw=true" width=90% title="results">
@@ -42,8 +47,8 @@ For the experiment, we will use [Pommerman](https://www.pommerman.com) environme
 
 - [x] Attach self-attention module at the graph generation
 - [ ] Substitute execution stage to Nervenet
-- [ ] Compare with random and heuristic agents
-- [ ] Redraw network structure
+- [ ] Experimental comparison
+- [x] Redraw network structure
 - [ ] Prepare arXiv paper
 
 
@@ -55,6 +60,7 @@ For the experiment, we will use [Pommerman](https://www.pommerman.com) environme
 * [Curiosity-driven exploration by self-supervised prediction](https://arxiv.org/abs/1705.05363)
 * [PlayGround: AI research into multi-agent learning](https://github.com/MultiAgentLearning/playground)
 * [Zero-shot task generalization with multi-task deep reinforcement learning](https://arxiv.org/abs/1706.05064)
+
 
 ## License
 
