@@ -42,8 +42,7 @@ class DdpgAgent(agents.BaseAgent):
             mini_batch=32, eval_episodes=10, eval_periods=100, env_render=False, summary_dir=None, gamma=0.99, *args, **kwargs):
 
         super(DdpgAgent, self).__init__(*args, **kwargs)
-        # Create the Estimator
-        self.estimator_nn1 = tf.estimator.Estimator(model_fn=model_NN1, model_dir=OUTPUT_DIR + '/sa_nn1')
+        
         # Set up logging for predictions
         # self.tensors_to_logNN1 = {"probabilities": "softmax_tensor"}
         # self.logging_hook_nn1 = tf.train.LoggingTensorHook(tensors=self.tensors_to_logNN1, every_n_iter=50)
@@ -92,15 +91,12 @@ class DdpgAgent(agents.BaseAgent):
 
     def act(self, obs, action_space):
         action = action_space.sample()
-        print('action: ', action)
 
         self.prev_state = self.curr_state
         if self.pr_action is not None:
             self.curr_state = state_to_matrix_with_action(obs, action=self.pr_action)
-            print('self.pr_action is not None')
 
         if self.prev_state is not None:
-            print('self.prev_state is not None')
             # Train the model
 
             curr_state_matrix = np.resize(self.curr_state.astype("float32"), (1, 38 * 11))
@@ -109,7 +105,7 @@ class DdpgAgent(agents.BaseAgent):
             graph_changed_manually, reward = reward_shaping(self.graph, curr_state_matrix, prev_state_matrix, self.agent_num)
             ##graph_changed_manually: (4, 120)
 
-            # print('graph_changed_manually: ', graph_changed_manually.shape, 'reward: ', reward)
+            print('graph_changed_manually: ', graph_changed_manually.shape, 'reward: ', reward)
 
 
             train_input_NN1 = tf.estimator.inputs.numpy_input_fn(
@@ -120,27 +116,32 @@ class DdpgAgent(agents.BaseAgent):
                 num_epochs=None,
                 shuffle=True)
             print('train_input_NN1 data loaded')
+            pred_input_NN1 = tf.estimator.inputs.numpy_input_fn(
+                x={"state1": prev_state_matrix,
+                   "state2": curr_state_matrix},
+                # y=np.asmatrix(graph_changed_manually.flatten()),
+                batch_size=1,
+                num_epochs=None,
+                shuffle=False)
+            print('eval_input_NN1 data loaded')
 
-            
-            # print('len(list(graph_predictions)): ', len(list(graph_predictions)))
-            # print(graph_predictions.shape, self.curr_state.shape, 'HAHAHHAHA')
-            # print('HAHAHHAHA')
+            # Create the estimator
+            self.estimator_nn1 = tf.estimator.Estimator(model_fn=model_NN1, model_dir=OUTPUT_DIR + '/sa_nn1')
 
-            self.estimator_nn1.train(
-                input_fn=train_input_NN1, 
-                steps=1)
-            # self.estimator_nn1.train(
-            #      input_fn=train_input_NN1,
-            #      steps=200,
-            #      hooks=[self.logging_hook_nn1])
-            graph_evaluations = self.estimator_nn1.evaluate(input_fn=train_input_NN1)
-            print('graph_evaluations:', graph_evaluations)
-            # graph_predictions = self.estimator_nn1.predict(input_fn=train_input_NN1)
-            # print('graph_predictions:', graph_predictions)
+            # Train the estimator
+            self.estimator_nn1.train(input_fn=train_input_NN1, steps=1)
 
-            padd_state = np.concatenate(self.curr_state, np.zeros((self.curr_state.shape[0], graph_evaluations.shape[1] - self.curr_state.shape[1])), axis=1)
+            # Predict the estimator
+            graph_predictions = list(self.estimator_nn1.predict(input_fn=pred_input_NN1))
+            graph_predictions = [p['predictions'][0] for p in graph_predictions]
 
-            input_to_ddpg = np.concatenate(padd_state, graph_evaluations, axis=0)
+            for i, p in enumerate(graph_predictions):
+                print(i, p)
+
+
+            padd_state = np.concatenate(self.curr_state, np.zeros((self.curr_state.shape[0], graph_predictions.shape[1] - self.curr_state.shape[1])), axis=1)
+
+            input_to_ddpg = np.concatenate(padd_state, graph_predictions, axis=0)
             print('here')
 
             action = self.actor.predict(np.expand_dims(input_to_ddpg, 0))[0, 0]
@@ -157,8 +158,9 @@ class DdpgAgent(agents.BaseAgent):
                 steps=200,
                 hooks=[logging_hook_nn2])
 
+
             predictions = estimator_nn2.predict(input_fn=train_input_NN2)
-            
+
             next_action = np.array(list(p['classes'] for p in predictions))
 
         self.pr_action = action

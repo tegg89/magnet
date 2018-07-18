@@ -55,8 +55,11 @@ def model_NN1(features, labels, mode):
     ######################### SELF-ATTENTION #########################
     ##################################################################
     
+    print('labels:', labels)
     decoder_inputs = tf.concat((tf.ones_like(labels[:, :1])*2, labels[:, :-1]), -1) #(1,120)
-# #     print('decoder_inputs', decoder_inputs)
+    print('decoder_inputs:', decoder_inputs)
+    print('decoder_inputs.shape:', decoder_inputs.shape)
+
 
 
     # Encoder
@@ -77,7 +80,7 @@ def model_NN1(features, labels, mode):
 
                 ### Feed Forward
                 enc = feedforward(enc, num_units=[4*512, 512])
-                print('enc: ', enc)
+                # print('enc: ', enc)
             
     # Decoder
     with tf.variable_scope("decoder"):
@@ -101,12 +104,12 @@ def model_NN1(features, labels, mode):
 
                 ## Feed Forward
                 dec = feedforward(dec, num_units=[4*512, 512])
-                print('dec: ', dec)
+                # print('dec: ', dec)
 
         # Final linear projection
         dec = tf.layers.dense(dec, 1024)
         dec = tf.reshape(dec, [1, -1])
-        print('final dec: ', dec)        
+        # print('final dec: ', dec)        
         
     ##################################################################
     ##################################################################
@@ -114,58 +117,23 @@ def model_NN1(features, labels, mode):
     
     # Output Tensor Shape: [batch_size, 1024]
     dropout = tf.layers.dropout(inputs=dec, rate=0.4, training=mode == tf.estimator.ModeKeys.TRAIN)
-    print('dropout: ', dropout) #(1, 120, 1024)
 
     logits = tf.layers.dense(inputs=dropout, units=480) # shape of matrix -- 120 * 4
-    print('logits: ', logits)
     print('labels.shape:', labels.shape, 'logits.shape:', logits.shape)
 
-    # is_target = tf.to_float(tf.not_equal(labels, logits))
-    # print('is_target:', is_target)
-
-    # acc = tf.reduce_sum(tf.to_float(tf.equal(logits, labels)))
-    # print('acc:', acc)
-
-    predictions = {"logits": logits}
-    loss = tf.losses.mean_squared_error(labels=labels, predictions=logits)
 
     if mode == tf.estimator.ModeKeys.PREDICT:
         print('PREDICT')
-        spec =  tf.estimator.EstimatorSpec(mode=mode, predictions=predictions)
+        spec = tf.estimator.EstimatorSpec(mode=mode, predictions={"graph": logits})
 
-    elif mode == tf.estimator.ModeKeys.TRAIN:
-        print('TRAIN')
-        optimizer = tf.train.GradientDescentOptimizer(learning_rate=0.001)
-        train_op = optimizer.minimize(loss=loss, global_step=tf.train.get_global_step())
-        spec = tf.estimator.EstimatorSpec(mode=mode, loss=loss, train_op=train_op)
-
-    else:
-        print('EVAL')
-        # In evaluation mode we will calculate evaluation metrics.
-        assert mode == tf.estimator.ModeKeys.EVAL
-
-        # Calculate root mean squared error
-        rmse = tf.metrics.root_mean_squared_error(labels, logits)
-
-        # Add the rmse to the collection of evaluation metrics.
-        eval_metrics = {"rmse": rmse}
-
-        spec = tf.estimator.EstimatorSpec(mode=mode, loss=loss, eval_metric_ops=eval_metrics)
-
-    # if mode == tf.estimator.ModeKeys.PREDICT:
-    #     spec = tf.estimator.EstimatorSpec(mode=mode, predictions=predictions)
-    # # print('labels', labels, 'logits', logits) #labels: (1,120), logits: (1,120,120)
-    # elif mode == tf.estimator.ModeKeys.TRAIN:
-    #     optimizer = tf.train.GradientDescentOptimizer(learning_rate=0.001)
-    #     train_op = optimizer.minimize(loss=loss, global_step=tf.train.get_global_step())
-    #     spec = tf.estimator.EstimatorSpec(mode=mode, loss=loss, train_op=train_op)
-    # else:
-    #     eval_metric_ops = {
-    #         "accuracy": tf.metrics.accuracy(labels=labels, predictions=predictions["classes"])}
-    #     spec = tf.estimator.EstimatorSpec(mode=mode, loss=loss, eval_metric_ops=eval_metric_ops)
+    print('TRAIN/EVAL')
+    loss = tf.losses.mean_squared_error(labels=labels, predictions=logits)
+    eval_metrics = {"rmse": tf.metrics.root_mean_squared_error(labels, logits)}
+    optimizer = tf.train.GradientDescentOptimizer(learning_rate=0.001)
+    train_op = optimizer.minimize(loss=loss, global_step=tf.train.get_global_step())
+    spec = tf.estimator.EstimatorSpec(mode=mode, loss=loss, train_op=train_op, eval_metric_ops=eval_metrics)
 
     print('spec is specified')
-    print('spec: ', spec)
     return spec
 
 def model_NN2(features, labels, mode):
