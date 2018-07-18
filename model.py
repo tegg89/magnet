@@ -61,7 +61,6 @@ def model_NN1(features, labels, mode):
     print('decoder_inputs.shape:', decoder_inputs.shape)
 
 
-
     # Encoder
     with tf.variable_scope("encoder"):
 

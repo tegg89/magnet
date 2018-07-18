@@ -105,7 +105,7 @@ class DdpgAgent(agents.BaseAgent):
             graph_changed_manually, reward = reward_shaping(self.graph, curr_state_matrix, prev_state_matrix, self.agent_num)
             ##graph_changed_manually: (4, 120)
 
-            print('graph_changed_manually: ', graph_changed_manually.shape, 'reward: ', reward)
+            print('graph_changed_manually: ', graph_changed_manually.shape)
 
 
             train_input_NN1 = tf.estimator.inputs.numpy_input_fn(
@@ -116,6 +116,8 @@ class DdpgAgent(agents.BaseAgent):
                 num_epochs=None,
                 shuffle=True)
             print('train_input_NN1 data loaded')
+            
+            print('graph_changed_manually: ', graph_changed_manually.shape)
             pred_input_NN1 = tf.estimator.inputs.numpy_input_fn(
                 x={"state1": prev_state_matrix,
                    "state2": curr_state_matrix},
