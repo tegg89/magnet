@@ -7,6 +7,7 @@ from utils import *
 from model import *
 from shaping import *
 from actor_critic_nn import *
+from ddpg_agent import DdpgAgent
 
 parser = argparse.ArgumentParser(description='ma-graph')
 parser.add_argument('--seed', type=int, default=1, metavar='S',
@@ -19,7 +20,7 @@ parser.add_argument('--max-episode-length', type=int, default=10000, metavar='M'
                     help='maximum length of an episode (default: 10000)')
 parser.add_argument('--env-name', default='PommeFFACompetition-v0', metavar='ENV',
                     help='environment to train on (default: PommeFFACompetition-v0)')
-parser.add_argument('--display', default=False, metavar='D',
+parser.add_argument('--display', default=True, metavar='D',
                     help='display the training environment.')
 
 # parser.add_argument('--no-shared', default=False, metavar='O',
@@ -48,7 +49,7 @@ def main():
         agents.SimpleAgent(),
         agents.SimpleAgent(),
         agents.RandomAgent(),
-        agents.RandomAgent(),
+        DdpgAgent(id = 3),
         # agents.DockerAgent("pommerman/simple-agent", port=12345),
     ]
     env = pommerman.make(args.env_name, agent_list)

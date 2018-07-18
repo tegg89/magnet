@@ -2,8 +2,8 @@
 
 import random
 
-from . import constants
-from . import utility
+import constants
+import utility
 
 
 class Bomber(object):

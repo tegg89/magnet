@@ -1,4 +1,3 @@
-from base_agent import BaseAgent
 import numpy as np
 import tensorflow as tf
 import argparse
@@ -8,23 +7,26 @@ from utils import *
 from model import *
 from shaping import *
 from actor_critic_nn import *
+from pommerman import agents
 
 ACTOR_LEARNING_RATE = 0.0001
 CRITIC_LEARNING_RATE = 0.001
-
-class DdpgAgent(BaseAgent):
+OUTPUT_DIR = "./output"
+class DdpgAgent(agents.BaseAgent):
     """The Random Agent that returns random actions given an action_space."""
 
 
-    def __init__(self, outdir="./output"):
+    def __init__(self, id, *args, **kwargs):
+
+        super(DdpgAgent, self).__init__(*args, **kwargs)
         # Create the Estimator
-        self.estimator_nn1 = tf.estimator.Estimator(model_fn=model_NN1, model_dir=outdir + '/sa_nn1')
+        self.estimator_nn1 = tf.estimator.Estimator(model_fn=model_NN1, model_dir=OUTPUT_DIR + '/sa_nn1')
         # Set up logging for predictions
         self.tensors_to_logNN1 = {"probabilities": "softmax_tensor"}
         self.logging_hook_nn1 = tf.train.LoggingTensorHook(tensors=self.tensors_to_logNN1, every_n_iter=50)
 
         # Create the Estimator
-        self.estimator_nn2 = tf.estimator.Estimator(model_fn=model_NN2, model_dir=outdir + '/sa_nn2')
+        self.estimator_nn2 = tf.estimator.Estimator(model_fn=model_NN2, model_dir=OUTPUT_DIR + '/sa_nn2')
         # Set up logging for predictions
         self.tensors_to_logNN2 = {"probabilities": "softmax_tensor"}
         self.vlogging_hook_nn2 = tf.train.LoggingTensorHook(tensors=self.tensors_to_logNN2, every_n_iter=50)
@@ -34,7 +36,7 @@ class DdpgAgent(BaseAgent):
         self.graph = np.random.rand(4, 120).astype("float32") + 0.0001
         self.pr_action = None
         self.pr_pr_action = None
-
+        self.agent_num = id
         # self.actor = ActorNetwork(sess, state_dim, action_dim, action_bound,
         #                      ACTOR_LEARNING_RATE, TAU)
         # self.critic = CriticNetwork(sess, state_dim, action_dim, action_bound,
@@ -42,6 +44,8 @@ class DdpgAgent(BaseAgent):
         #
         # self.replay_buffer = ReplayBuffer(BUFFER_SIZE, RANDOM_SEED)
         # self.noise = GreedyPolicy(action_dim, EXPLORATION_EPISODES, MIN_EPSILON, MAX_EPSILON)
+
+
 
     def act(self, obs, action_space):
         self.prev_state = self.curr_state
@@ -58,7 +62,7 @@ class DdpgAgent(BaseAgent):
                 state_to_matrix_with_action(self.prev_state, action=self.pr_pr_action).astype(
                     "float32"), (1, 38 * 11))
 
-            reward_shaping(self.graph, curr_state_matrix, prev_state_matrix)
+            reward_shaping(self.graph, curr_state_matrix, prev_state_matrix, self.agent_num)
 
             train_input_NN2 = tf.estimator.inputs.numpy_input_fn(
                 x={"state": curr_state_matrix,
