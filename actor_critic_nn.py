@@ -53,9 +53,8 @@ class BaseNetwork(object):
         raise NotImplementedError("update target network!")
 
 class ActorNetwork(BaseNetwork):
-    def __init__(self, sess, state_dim, action_dim, action_bound, learning_rate, tau):
+    def __init__(self, sess, state_dim, action_dim, learning_rate, tau):
         super(ActorNetwork, self).__init__(sess, state_dim, action_dim, learning_rate, tau)
-        self.action_bound = action_bound
 
         # Actor network
         self.inputs, self.phase, self.outputs, self.scaled_outputs = self.build_network()
@@ -127,9 +126,8 @@ class ActorNetwork(BaseNetwork):
 
 class CriticNetwork(BaseNetwork):
 
-    def __init__(self, sess, state_dim, action_dim, action_bound, learning_rate, tau, num_actor_vars):
+    def __init__(self, sess, state_dim, action_dim, learning_rate, tau, num_actor_vars):
         super(CriticNetwork, self).__init__(sess, state_dim, action_dim, learning_rate, tau)
-        self.action_bound = action_bound
 
         # Critic network
         self.inputs, self.phase, self.action, self.outputs = self.build_network()

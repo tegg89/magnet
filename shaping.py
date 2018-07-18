@@ -168,4 +168,4 @@ def reward_shaping(graph, curr_state, prev_state, agent_num):
         killed[agent_num]['was dead on previous step'] = 'True'
         return graph
 
-    return graph
+    return graph, reward
