@@ -45,14 +45,14 @@ class DdpgAgent(agents.BaseAgent):
         # Create the Estimator
         self.estimator_nn1 = tf.estimator.Estimator(model_fn=model_NN1, model_dir=OUTPUT_DIR + '/sa_nn1')
         # Set up logging for predictions
-        self.tensors_to_logNN1 = {"probabilities": "softmax_tensor"}
-        self.logging_hook_nn1 = tf.train.LoggingTensorHook(tensors=self.tensors_to_logNN1, every_n_iter=50)
+        # self.tensors_to_logNN1 = {"probabilities": "softmax_tensor"}
+        # self.logging_hook_nn1 = tf.train.LoggingTensorHook(tensors=self.tensors_to_logNN1, every_n_iter=50)
 
         # Create the Estimator
-        self.estimator_nn2 = tf.estimator.Estimator(model_fn=model_NN2, model_dir=OUTPUT_DIR + '/sa_nn2')
-        # Set up logging for predictions
-        self.tensors_to_logNN2 = {"probabilities": "softmax_tensor"}
-        self.vlogging_hook_nn2 = tf.train.LoggingTensorHook(tensors=self.tensors_to_logNN2, every_n_iter=50)
+        # self.estimator_nn2 = tf.estimator.Estimator(model_fn=model_NN2, model_dir=OUTPUT_DIR + '/sa_nn2')
+        # # Set up logging for predictions
+        # self.tensors_to_logNN2 = {"probabilities": "softmax_tensor"}
+        # self.logging_hook_nn2 = tf.train.LoggingTensorHook(tensors=self.tensors_to_logNN2, every_n_iter=50)
 
         self.curr_state = None
         self.prev_state = None
@@ -92,18 +92,24 @@ class DdpgAgent(agents.BaseAgent):
 
     def act(self, obs, action_space):
         action = action_space.sample()
+        print('action: ', action)
 
         self.prev_state = self.curr_state
         if self.pr_action is not None:
             self.curr_state = state_to_matrix_with_action(obs, action=self.pr_action)
+            print('self.pr_action is not None')
 
         if self.prev_state is not None:
+            print('self.prev_state is not None')
             # Train the model
 
             curr_state_matrix = np.resize(self.curr_state.astype("float32"), (1, 38 * 11))
             prev_state_matrix = np.resize(self.prev_state.astype("float32"), (1, 38 * 11))
 
             graph_changed_manually, reward = reward_shaping(self.graph, curr_state_matrix, prev_state_matrix, self.agent_num)
+            ##graph_changed_manually: (4, 120)
+
+            # print('graph_changed_manually: ', graph_changed_manually.shape, 'reward: ', reward)
 
 
             train_input_NN1 = tf.estimator.inputs.numpy_input_fn(
@@ -113,43 +119,57 @@ class DdpgAgent(agents.BaseAgent):
                 batch_size=1,
                 num_epochs=None,
                 shuffle=True)
+            print('train_input_NN1 data loaded')
 
-            graph_predictions = self.estimator_nn1.predict(input_fn=train_input_NN1)
-
-            print(graph_predictions.shape, self.curr_state.shape, 'HAHAHHAHA')
+            
+            # print('len(list(graph_predictions)): ', len(list(graph_predictions)))
+            # print(graph_predictions.shape, self.curr_state.shape, 'HAHAHHAHA')
+            # print('HAHAHHAHA')
 
             self.estimator_nn1.train(
-                 input_fn=train_input_NN1,
-                 steps=200,
-                 hooks=[self.logging_hook_nn1])
-            padd_state = np.concatenate(self.curr_state, np.zeros((self.curr_state.shape[0], graph_predictions.shape[1] - self.curr_state.shape[1])), axis=1)
+                input_fn=train_input_NN1, 
+                steps=1)
+            # self.estimator_nn1.train(
+            #      input_fn=train_input_NN1,
+            #      steps=200,
+            #      hooks=[self.logging_hook_nn1])
+            graph_evaluations = self.estimator_nn1.evaluate(input_fn=train_input_NN1)
+            print('graph_evaluations:', graph_evaluations)
+            # graph_predictions = self.estimator_nn1.predict(input_fn=train_input_NN1)
+            # print('graph_predictions:', graph_predictions)
 
-            input_to_ddpg = np.concatenate(padd_state, graph_predictions, axis=0)
+            padd_state = np.concatenate(self.curr_state, np.zeros((self.curr_state.shape[0], graph_evaluations.shape[1] - self.curr_state.shape[1])), axis=1)
 
-            #action = self.actor.predict(np.expand_dims(input_to_ddpg, 0))[0, 0]
-            # train_input_NN2 = tf.estimator.inputs.numpy_input_fn(
-            #     x={"state": curr_state_matrix,
-            #        "graph": np.resize(graph_predictions, (1, 4 * 120))},
-            #     y=np.asarray([actions[agent_num]]),
-            #     batch_size=1,
-            #     num_epochs=None,
-            #     shuffle=True)
+            input_to_ddpg = np.concatenate(padd_state, graph_evaluations, axis=0)
+            print('here')
 
-            # estimator_nn2.train(
-            #     input_fn=train_input_NN2,
-            #     steps=200,
-            #     hooks=[logging_hook_nn2])
-            # predictions = estimator_nn2.predict(input_fn=train_input_NN2)
-            # next_action = np.array(list(p['classes'] for p in predictions))
+            action = self.actor.predict(np.expand_dims(input_to_ddpg, 0))[0, 0]
+            train_input_NN2 = tf.estimator.inputs.numpy_input_fn(
+                x={"state": curr_state_matrix,
+                   "graph": np.resize(graph_predictions, (1, 4 * 120))},
+                y=np.asarray([actions[agent_num]]),
+                batch_size=1,
+                num_epochs=None,
+                shuffle=True)
+
+            estimator_nn2.train(
+                input_fn=train_input_NN2,
+                steps=200,
+                hooks=[logging_hook_nn2])
+
+            predictions = estimator_nn2.predict(input_fn=train_input_NN2)
+            
+            next_action = np.array(list(p['classes'] for p in predictions))
 
         self.pr_action = action
+
         return action
 
     def train(self):
         # Initialize target network weights
         self.actor.update_target_network()
         self.critic.update_target_network()
-
+        print('train start!')
         for cur_episode in range(self.max_episodes):
 
             # evaluate here.
@@ -158,7 +178,7 @@ class DdpgAgent(agents.BaseAgent):
 
             state = self.env.reset()
             state = state_to_matrix(state[0])
-
+            print('state: ', state)
             episode_reward = 0
             episode_ave_max_q = 0
 
@@ -173,8 +193,8 @@ class DdpgAgent(agents.BaseAgent):
                     action = action[0]
                 else:
                     action = self.noise.generate(self.actor.predict(np.expand_dims(state, 0))[0, 0], cur_episode)
-                    actoin = action[0]
-
+                    action = action[0]
+                print('action: ', action)
                 next_state, reward, terminal, info = self.env.step(action[0])
                 next_state = state_to_matrix(next_state[0])
 
@@ -188,9 +208,8 @@ class DdpgAgent(agents.BaseAgent):
                     # Calculate targets
                     target_q = self.critic.predict_target(next_state_batch, self.actor.predict_target(next_state_batch))
 
-                    y_i = np.reshape(reward_batch, (self.mini_batch, 1)) + (1 - np.reshape(terminal_batch,
-                                                                                           (self.mini_batch, 1)).astype(
-                                float)) \
+                    y_i = np.reshape(reward_batch, (self.mini_batch, 1)) + (1 - np.reshape(terminal_batch, 
+                        (self.mini_batch, 1)).astype(float)) \
                           * self.gamma * np.reshape(target_q, (self.mini_batch, 1))
 
                     # Update the critic given the targets

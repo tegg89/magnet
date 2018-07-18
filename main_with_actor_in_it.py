@@ -87,74 +87,74 @@ def main():
         # replay_buffer = ReplayBuffer(BUFFER_SIZE, RANDOM_SEED)
         # noise = GreedyPolicy(action_dim, EXPLORATION_EPISODES, MIN_EPSILON, MAX_EPSILON)
 
-    for i_episode in range(args.max_episode_length):
-        state = env.reset()
+        for i_episode in range(args.max_episode_length):
+            state = env.reset()
 
-        done = False
-        curr_state = None
-        prev_state = None
-        graph = np.random.rand(4, 120).astype("float32") + 0.0001
-        #         print(graph)
-        pr_action = None
-        pr_pr_action = None
+            done = False
+            curr_state = None
+            prev_state = None
+            graph = np.random.rand(4, 120).astype("float32") + 0.0001
+            #         print(graph)
+            pr_action = None
+            pr_pr_action = None
 
-        while not done:
+            while not done:
 
-            if args.display:
-                env.render()
+                if args.display:
+                    env.render()
 
-            actions = env.act(state)
-            state, reward, done, info = env.step(actions)
-            r_sum[i] += reward[0]
+                actions = env.act(state)
+                state, reward, done, info = env.step(actions)
+                r_sum[i] += reward[0]
 
-            # as basic implementation I consider only one agent
-            prev_state = curr_state
-            curr_state = state
+                # as basic implementation I consider only one agent
+                prev_state = curr_state
+                curr_state = state
 
-            if pr_pr_action is not None:
-                # Train the model
-                for agent_num in range(4):
-                    curr_state_matrix = np.resize(
-                        state_to_matrix_with_action(curr_state[agent_num], action=pr_action[agent_num]).astype(
-                            "float32"), (1, 38 * 11))
-                    prev_state_matrix = np.resize(
-                        state_to_matrix_with_action(prev_state[agent_num], action=pr_pr_action[agent_num]).astype(
-                            "float32"), (1, 38 * 11))
+                if pr_pr_action is not None:
+                    # Train the model
+                    for agent_num in range(4):
+                        curr_state_matrix = np.resize(
+                            state_to_matrix_with_action(curr_state[agent_num], action=pr_action[agent_num]).astype(
+                                "float32"), (1, 38 * 11))
+                        prev_state_matrix = np.resize(
+                            state_to_matrix_with_action(prev_state[agent_num], action=pr_pr_action[agent_num]).astype(
+                                "float32"), (1, 38 * 11))
 
-                    reward_shaping(graph, curr_state_matrix, prev_state_matrix, agent_num)
+                        reward_shaping(graph, curr_state_matrix, prev_state_matrix, agent_num)
 
-                    train_input_NN2 = tf.estimator.inputs.numpy_input_fn(
-                        x={"state": curr_state_matrix,
-                           "graph": np.resize(graph, (1, 4 * 120))},
-                        y=np.asarray([actions[agent_num]]),
-                        batch_size=1,
-                        num_epochs=None,
-                        shuffle=True)
+                        train_input_NN2 = tf.estimator.inputs.numpy_input_fn(
+                            x={"state": curr_state_matrix,
+                               "graph": np.resize(graph, (1, 4 * 120))},
+                            y=np.asarray([actions[agent_num]]),
+                            batch_size=1,
+                            num_epochs=None,
+                            shuffle=True)
 
-                    train_input_NN1 = tf.estimator.inputs.numpy_input_fn(
-                        x={"state1": prev_state_matrix,
-                           "state2": curr_state_matrix},
-                        y=np.asmatrix(graph.flatten()),
-                        batch_size=1,
-                        num_epochs=None,
-                        shuffle=True)
-                    # estimator_nn1.train(
-                    #     input_fn=train_input_NN1,
-                    #     steps=200,
-                    #     hooks=[logging_hook_nn1])
+                        train_input_NN1 = tf.estimator.inputs.numpy_input_fn(
+                            x={"state1": prev_state_matrix,
+                               "state2": curr_state_matrix},
+                            y=np.asmatrix(graph.flatten()),
+                            batch_size=1,
+                            num_epochs=None,
+                            shuffle=True)
+                        # estimator_nn1.train(
+                        #     input_fn=train_input_NN1,
+                        #     steps=200,
+                        #     hooks=[logging_hook_nn1])
 
-                    # estimator_nn2.train(
-                    #     input_fn=train_input_NN2,
-                    #     steps=200,
-                    #     hooks=[logging_hook_nn2])
-                    # predictions = estimator_nn2.predict(input_fn=train_input_NN2)
-                    # next_action = np.array(list(p['classes'] for p in predictions))
+                        # estimator_nn2.train(
+                        #     input_fn=train_input_NN2,
+                        #     steps=200,
+                        #     hooks=[logging_hook_nn2])
+                        # predictions = estimator_nn2.predict(input_fn=train_input_NN2)
+                        # next_action = np.array(list(p['classes'] for p in predictions))
 
-            pr_pr_action = pr_action
-            pr_action = actions
+                pr_pr_action = pr_action
+                pr_action = actions
 
-        if i_episode > 300:
-            break
+            if i_episode > 300:
+                break
 
     print('Game {} finished'.format(i))
 

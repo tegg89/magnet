@@ -20,7 +20,7 @@ parser.add_argument('--max-episode-length', type=int, default=10000, metavar='M'
                     help='maximum length of an episode (default: 10000)')
 parser.add_argument('--env-name', default='PommeFFACompetition-v0', metavar='ENV',
                     help='environment to train on (default: PommeFFACompetition-v0)')
-parser.add_argument('--display', default=True, metavar='D',
+parser.add_argument('--display', default=False, metavar='D',
                     help='display the training environment.')
 
 # parser.add_argument('--no-shared', default=False, metavar='O',
@@ -49,7 +49,7 @@ def main():
         agents.SimpleAgent(),
         agents.SimpleAgent(),
         agents.RandomAgent(),
-        DdpgAgent(id = 3),
+        DdpgAgent(id=3),
         # agents.DockerAgent("pommerman/simple-agent", port=12345),
     ]
     env = pommerman.make(args.env_name, agent_list)
