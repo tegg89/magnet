@@ -17,7 +17,7 @@ def criric_model(features, labels, mode):
     m = {}
 
     # First step: h_{u}^{0} = MLP_{item}(s_{u})
-    # first 120 elemeent desxribe items s_{u} and 120:124 desribe agents state s_{u}
+    # first 120 elemeent describe items s_{u} and 120:124 desribe agents state s_{u}
     input_layer_data = tf.reshape(features["data"], [-1, 124, 38 * 11, 1])
 
     # MLP_{0} for items:
@@ -89,7 +89,7 @@ def criric_model(features, labels, mode):
         # if vertex exist
         if vertexes_mask[0, i] == 1:
             input_layer_vertex = tf.reshape(tf.concat([h[120], h[121], h[122], h[123]], 0), [-1, 4, 7, 1])
-            # Output shape == batch_size, 4, 7, 1
+            # Output shape: [batch_size, 4, 7, 1]
             conv1_vertex = tf.layers.conv2d(
                 inputs=input_layer_vertex,
                 filters=32,
@@ -230,7 +230,7 @@ def main(unused_argv):
 
     mnist_classifier.train(
         input_fn=train_input_fn,
-        steps=1,
+        steps=20,
         hooks=[logging_hook])
 
     # Evaluate the model and print results
