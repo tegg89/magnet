@@ -23,8 +23,14 @@ For the experiment, we will use [Pommerman](https://www.pommerman.com) environme
 * Afterward, each agents execute the optimal actions based on the trained graph.
 * The network design of prototype is shown below.
 <p align="center">
-  <img src="https://github.com/tegg89/DLCamp_Jeju2018/blob/master/asset/prev_network.jpg?raw=true" width=70% title="network">
+  <img src="https://github.com/tegg89/DLCamp_Jeju2018/blob/master/asset/curr_network.jpg?raw=true" width=70% title="network">
 </p>
+
+
+## Dependencies
+The script has been tested running under Python 3.6.6, with the following packages installed (along with their dependencies):
+* `numpy==1.14.5`
+* `tensorflow==1.8.0`
 
 
 ## Experiments
