@@ -13,6 +13,7 @@ from pommerman import agents
 from GreedyPolicy import GreedyPolicy
 from ReplayBuffer import ReplayBuffer
 from env_wrapper import EnvWrapper
+import itertools
 
 # Base learning rate for the Actor network
 ACTOR_LEARNING_RATE = 0.0001
@@ -106,45 +107,23 @@ class DdpgAgent(agents.BaseAgent):
             self.curr_state = state_to_matrix_with_action(obs, action=self.pr_action)
 
         if self.prev_state is not None:
-            # Train the model
-
-            curr_state_matrix = np.resize(self.curr_state.astype("float32"), (1, 38 * 11))
-            prev_state_matrix = np.resize(self.prev_state.astype("float32"), (1, 38 * 11))
-
-            graph_changed_manually, reward = reward_shaping(self.graph, curr_state_matrix, prev_state_matrix,
-                                                            self.agent_num)
-
-            train_input_NN1 = tf.estimator.inputs.numpy_input_fn(
-                x={"state1": prev_state_matrix,
-                   "state2": curr_state_matrix},
-                y=np.asmatrix(graph_changed_manually.flatten()),
-                batch_size=1,
-                num_epochs=None,
-                shuffle=True)
-            print('train_input_NN1 data loaded')
-            eval_input_NN1 = tf.estimator.inputs.numpy_input_fn(
-                x={"state1": prev_state_matrix,
-                   "state2": curr_state_matrix},
-                # y=np.asmatrix(graph_changed_manually.flatten()),
-                batch_size=1,
-                num_epochs=None,
-                shuffle=False)
+            curr_state_matrix = self.curr_state.astype("float32")
+            prev_state_matrix = self.prev_state.astype("float32")
 
             pred_input_NN1 = tf.estimator.inputs.numpy_input_fn(
                 x={"state1": prev_state_matrix,
                    "state2": curr_state_matrix,
                    "y": np.asmatrix(self.graph.flatten())},
-                y=np.asmatrix(graph_changed_manually.flatten()),
+                y=np.asmatrix(self.graph.flatten()),
                 batch_size=1,
                 num_epochs=None,
                 shuffle=False)
 
-            # Train the estimator
-            self.estimator_nn1.train(input_fn=train_input_NN1, steps=1)
 
             # Predict the estimator
-            graph_predictions = list(self.estimator_nn1.predict(input_fn=pred_input_NN1))
-            graph_predictions = [p['predictions'][0] for p in graph_predictions]
+            y_generator = self.estimator_nn1.predict(input_fn=pred_input_NN1)
+            print('HERTR')
+            graph_predictions = list(itertools.islice(y_generator, pred_input_NN1.shape[0]))
 
             padd_state = np.concatenate(self.curr_state, np.zeros(
                 (self.curr_state.shape[0], graph_predictions.shape[1] - self.curr_state.shape[1])), axis=1)
@@ -157,7 +136,67 @@ class DdpgAgent(agents.BaseAgent):
 
         return action
 
-    def train(self, sess, env, epsilon=1.0, min_epsilon=0.01):
+    def train_transformer(self, sess, env):
+        self.sess = sess
+        self.env = EnvWrapper(env, num_agent=self.agent_num)
+
+        # Initialize target network weights
+
+        for cur_episode in range(self.max_episodes):
+            self.__restart__()
+            # evaluate here.
+
+            state = env.reset()
+            episode_reward = 0
+
+            for cur_step in range(self.max_steps_episode):
+
+                if self.env_render:
+                    self.env.render()
+
+                action = self.env.action_space.sample()
+                print(action, 'action')
+
+                # 2. take action, see next state and reward :
+                next_state, reward, terminal, info = self.env.step(action)
+
+                graph_changed_manually, reward = reward_shaping(self.graph, next_state, state, self.agent_num)
+                # 3. Save in replay buffer:
+                self.replay_buffer.add(state, action, reward, graph_changed_manually.flatten(), next_state)
+
+                # Keep adding experience to the memory until there are at least minibatch size samples
+                if self.replay_buffer.size() > self.warmup_steps:
+                    state_batch, action_batch, reward_batch, graph_changed_manually_batch, next_state_batch = \
+                        self.replay_buffer.sample_batch(self.mini_batch)
+
+                    # Calculate targets
+                    train_input_NN1 = tf.estimator.inputs.numpy_input_fn(
+                        x={"state1": state_batch,
+                           "state2": next_state_batch},
+                        y=np.asmatrix(graph_changed_manually_batch),
+                        batch_size=1,
+                        num_epochs=None,
+                        shuffle=True)
+                    print('train_input_NN1 data loaded')
+
+                    # Train the estimator
+                    self.estimator_nn1.train(input_fn=train_input_NN1, steps=1)
+
+                state = next_state
+                episode_reward += reward
+
+                if terminal or cur_step == self.max_steps_episode - 1:
+                    train_episode_summary = tf.Summary()
+                    train_episode_summary.value.add(simple_value=episode_reward, tag="train/episode_reward")
+
+                    self.writer.add_summary(train_episode_summary, cur_episode)
+                    self.writer.flush()
+
+                    print('Reward: %.2i' % int(episode_reward), ' | Episode', cur_episode)
+
+                    break
+
+    def train_ddpg(self, sess, env, epsilon=1.0, min_epsilon=0.01):
         self.sess = sess
         self.env = EnvWrapper(env, num_agent=self.agent_num)
 
