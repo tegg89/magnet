@@ -94,7 +94,7 @@ class EnvWrapper(Env):
         raise NotImplementedError()
 
     def featurize(self, obs):
-        obs = state_to_matrix_with_action(obs, action=self.pr_action)
+        obs = state_to_matrix_with_action(obs, action=self.pr_action).astype("float32")
         return obs
 
     def __del__(self):

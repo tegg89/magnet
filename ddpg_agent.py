@@ -18,7 +18,7 @@ import itertools
 # Base learning rate for the Actor network
 ACTOR_LEARNING_RATE = 0.0001
 # Base learning rate for the Critic Network
-CRITIC_LEARNING_RATE =  0.001
+CRITIC_LEARNING_RATE = 0.001
 # Soft target update param
 TAU = 0.001
 MAX_EPISODES = 100000
@@ -37,14 +37,14 @@ EVAL_EPISODES = 10
 MINI_BATCH = 64
 RANDOM_SEED = 123
 ACTION_DIM = 1
-STATE_DIM = 38*11
+STATE_DIM = 38 * 11
 EXPLORE = 70
 DATETIME = datetime.datetime.now().strftime('%Y%m%d%H%M%S')
 SUMMARY_DIR = './results/{}/tf_ddpg'.format(DATETIME)
 
-
-
 OUTPUT_DIR = "./output"
+
+
 class DdpgAgent(agents.BaseAgent):
     """The Random Agent that returns random actions given an action_space."""
 
@@ -55,9 +55,10 @@ class DdpgAgent(agents.BaseAgent):
         self.pr_action = None
         self.gamma = gamma
 
-
-    def __init__(self, id, sess, env = None, exploration_episodes=1000, max_episodes=300, max_steps_episode=300, warmup_steps=5000,\
-            mini_batch=32, eval_episodes=10, eval_periods=100, env_render=False, summary_dir=SUMMARY_DIR, gamma=0.99, *args, **kwargs):
+    def __init__(self, id, sess, env=None, exploration_episodes=1000, max_episodes=300, max_steps_episode=300,
+                 warmup_steps=2, \
+                 mini_batch=2, eval_episodes=10, eval_periods=100, env_render=False, summary_dir=SUMMARY_DIR,
+                 gamma=0.99, *args, **kwargs):
 
         super(DdpgAgent, self).__init__(*args, **kwargs)
         # Create the Estimator
@@ -94,46 +95,53 @@ class DdpgAgent(agents.BaseAgent):
 
         cell = tf.contrib.rnn.BasicLSTMCell(num_units=300, state_is_tuple=True, reuse=None)
         cell_target = tf.contrib.rnn.BasicLSTMCell(num_units=300, state_is_tuple=True, reuse=None)
-        self.critic = CriticNetwork(sess, STATE_DIM, ACTION_DIM, CRITIC_LEARNING_RATE, TAU, cell, cell_target, self.actor.get_num_trainable_vars())
+        self.critic = CriticNetwork(sess, STATE_DIM, ACTION_DIM, CRITIC_LEARNING_RATE, TAU, cell, cell_target,
+                                    self.actor.get_num_trainable_vars())
 
         self.replay_buffer = ReplayBuffer(BUFFER_SIZE, RANDOM_SEED)
         self.noise = GreedyPolicy(ACTION_DIM, EXPLORATION_EPISODES, MIN_EPSILON, MAX_EPSILON)
+
+    def __input_to_ddpg__(self, prev_state, curr_state):
+        pred_input_NN1 = tf.estimator.inputs.numpy_input_fn(
+            x={"state1": prev_state.astype("float32"),
+               "state2": curr_state.astype("float32"),
+               "y": np.asmatrix(self.graph.flatten())},
+            y=np.asmatrix(self.graph.flatten()),
+            batch_size=1,
+            num_epochs=None,
+            shuffle=False)
+
+        # Predict the estimator
+        y_generator = self.estimator_nn1.predict(input_fn=pred_input_NN1)
+        graph_predictions = np.asmatrix(list(itertools.islice(y_generator, prev_state.shape[0]))[0]['graph'])
+        input_to_ddpg = np.concatenate([self.curr_state, graph_predictions], axis=1)
+        return input_to_ddpg
 
     def act(self, obs, action_space):
         action = action_space.sample()
 
         self.prev_state = self.curr_state
         if self.pr_action is not None:
-            self.curr_state = state_to_matrix_with_action(obs, action=self.pr_action).astype("float32")
+            self.curr_state = state_to_matrix_with_action(obs, action=self.pr_action)
 
         if self.prev_state is not None:
-            curr_state_matrix = self.curr_state
-            prev_state_matrix = self.prev_state
+            curr_state = self.curr_state
+            prev_state = self.prev_state
 
-            pred_input_NN1 = tf.estimator.inputs.numpy_input_fn(
-                x={"state1": prev_state_matrix,
-                   "state2": curr_state_matrix,
-                   "y": np.asmatrix(self.graph.flatten())},
-                y=np.asmatrix(self.graph.flatten()),
-                batch_size=1,
-                num_epochs=None,
-                shuffle=False)
+            input_to_ddpg = self.__input_to_ddpg__(prev_state, curr_state)
 
-
-            # Predict the estimator
-            y_generator = self.estimator_nn1.predict(input_fn=pred_input_NN1)
-            graph_predictions =  np.asmatrix(list(itertools.islice(y_generator, prev_state_matrix.shape[0]))[0]['graph'])
-            input_to_ddpg = np.concatenate([self.curr_state, graph_predictions], axis=1)
             print(input_to_ddpg.shape)
-            #action = self.actor.predict(np.expand_dims(input_to_ddpg, 0))[0, 0]
+            # action = self.actor.predict(np.expand_dims(input_to_ddpg, 0))[0, 0]
 
         self.pr_action = action
 
         return action
 
-    def train_transformer(self, sess, env):
+    def train_transformer(self, sess, env, max_episodes=2, max_steps_episode=3):
         self.sess = sess
         self.env = EnvWrapper(env, num_agent=self.agent_num)
+        self.max_steps_episode = max_steps_episode
+        self.max_episodes = max_episodes
 
         # Initialize target network weights
 
@@ -141,7 +149,7 @@ class DdpgAgent(agents.BaseAgent):
             self.__restart__()
             # evaluate here.
 
-            state = env.reset()
+            state = self.env.reset()
             episode_reward = 0
 
             for cur_step in range(self.max_steps_episode):
@@ -204,7 +212,8 @@ class DdpgAgent(agents.BaseAgent):
             self.__restart__()
             # evaluate here.
 
-            state = env.reset()
+            prev_state = self.env.reset()
+            state = self.env.reset()
             episode_reward = 0
             episode_ave_max_q = 0
             max_state_episode = -1
@@ -222,45 +231,53 @@ class DdpgAgent(agents.BaseAgent):
                     action = self.env.action_space.sample()
                     print(action, 'action')
                 else:
-                    action = self.noise.generate(self.actor.predict(np.expand_dims(state, 0))[0, 0], cur_episode)
+                    action = self.noise.generate(self.actor.predict(state)[0, 0], cur_episode)
                     print(action, 'action')
 
                 # 2. take action, see next state and reward :
                 next_state, reward, terminal, info = self.env.step(action)
+
+                next_input_to_ddpg = self.__input_to_ddpg__(state, next_state)
+                input_to_ddpg = self.__input_to_ddpg__(prev_state, state)
+
                 # 3. Save in replay buffer:
-                self.replay_buffer.add(state, action, reward, terminal, next_state)
+                self.replay_buffer.add(input_to_ddpg, action, reward, terminal, next_input_to_ddpg)
 
                 # Keep adding experience to the memory until there are at least minibatch size samples
-                if self.replay_buffer.size() > self.warmup_steps:
+                if self.replay_buffer.size() >= self.warmup_steps:
                     state_batch, action_batch, reward_batch, terminal_batch, next_state_batch = \
                         self.replay_buffer.sample_batch(self.mini_batch)
-
+                    next_state_batch = np.reshape(next_state_batch,
+                                                  (next_state_batch.shape[0], next_state_batch.shape[2]))
+                    state_batch = np.reshape(state_batch, (state_batch.shape[0], state_batch.shape[2]))
                     # Calculate targets
 
                     # 5. Train critic Network (states,actions, R + gamma* V(s', a')):
                     # 5.1 Get critic prediction = V(s', a')
                     # the a' is obtained using the actor prediction! or in other words : a' = actor(s')
-                    target_q = self.critic.predict_target(next_state_batch, self.actor.predict_target(next_state_batch))
+
+                    target_q = self.critic.predict_target(next_state_batch, self.actor.predict_target(next_state_batch),
+                                                          1)
                     # 5.2 get y_t where:
-                    y_i = np.reshape(reward_batch, (self.mini_batch, 1)) + (1 - np.reshape(terminal_batch,
-                                                                                           (self.mini_batch, 1)).astype(
-                                float)) \
+                    y_i = np.reshape(reward_batch, (self.mini_batch, 1)) \
+                          + (1 - np.reshape(terminal_batch, (self.mini_batch, 1)).astype(float)) \
                           * self.gamma * np.reshape(target_q, (self.mini_batch, 1))
 
                     # Update the critic given the targets
                     action_batch = np.reshape(action_batch, [self.mini_batch, 1])
-                    predicted_q_value, _ = self.critic.train(state_batch, action_batch, np.reshape(y_i, (self.mini_batch, 1)), 20)
+                    predicted_q_value, _ = self.critic.train(state_batch, action_batch,
+                                                             np.reshape(y_i, (self.mini_batch, 1)), 1)
                     episode_ave_max_q += np.amax(predicted_q_value)
-
                     # Update the actor policy using the sampled gradient
                     a_outs = self.actor.predict(state_batch)
-                    a_grads = self.critic.action_gradients(state_batch, a_outs)
+                    a_grads = self.critic.action_gradients(state_batch, a_outs, 1)
                     self.actor.train(state_batch, a_grads[0])
 
                     # Update target networks
                     self.actor.update_target_network()
                     self.critic.update_target_network()
 
+                prev_state = state
                 state = next_state
                 episode_reward += reward
 

@@ -62,10 +62,10 @@ def main():
     env.seed(RANDOM_SEED)
 
 
-    #print('HERE0', sess)
-    #ddpg_agent.train(sess, env)
-    #print('her2')
-    #print(9/0)
+    print('HERE0', sess)
+    ddpg_agent.train_transformer(sess, env)
+    print('her2')
+    print(9/0)
     r_sum = np.zeros(1)
 
     for i in range(args.num_steps):
