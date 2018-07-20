@@ -122,7 +122,7 @@ class DdpgAgent(agents.BaseAgent):
 
             # Predict the estimator
             y_generator = self.estimator_nn1.predict(input_fn=pred_input_NN1)
-            graph_predictions =  np.asmatrix(list(itertools.islice(y_generator, prev_state_matrix.shape[0]))[0]['graph'])
+            graph_predictions =  np.asmatrix(list(itertools.islice(y_generator, prev_state_matrix.shape[0]))[0]['y'])
             input_to_ddpg = np.concatenate([self.curr_state, graph_predictions], axis=1)
             print(input_to_ddpg.shape)
             #action = self.actor.predict(np.expand_dims(input_to_ddpg, 0))[0, 0]

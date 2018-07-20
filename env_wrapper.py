@@ -1,5 +1,5 @@
 import numpy as np
-from rl.core import Env, Processor
+from gym import Env
 from utils import *
 from model import *
 from shaping import *

@@ -52,7 +52,7 @@ The script has been tested running under Python 3.6.6, with the following packag
 ## TODO
 
 - [x] Attach self-attention module at the graph generation
-- [ ] Substitute execution stage to Nervenet
+- [x] Substitute execution stage to Nervenet
 - [ ] Experimental comparison
 - [x] Redraw network structure
 - [ ] Prepare arXiv paper
