@@ -2,10 +2,15 @@ import tensorflow as tf
 
 from transformer import *
 
+
 def model_NN1(features, labels, mode):
-    #Implement 3 seperate preprocessing and combine them together
+    # Implement 3 seperate preprocessing and combine them together
     # implementation of NN with 3 inputs: https://stackoverflow.com/questions/40318457/how-to-build-a-multiple-input-graph-with-tensor-flow
 
+    if labels is None:
+        labels = features["y"]
+
+    # labels = tf.placeholder(tf.float32, shape=(1, 480))
     # First state preprocessing
     input_layer_state1 = tf.reshape(features["state1"], [-1, 38, 11, 1])
     conv1_state1 = tf.layers.conv2d(
@@ -48,18 +53,14 @@ def model_NN1(features, labels, mode):
     pool2_flat_state2 = tf.reshape(pool2_state2, [-1, 9 * 2 * 64])
 
     whole_model = tf.concat([pool2_flat_state2, pool2_flat_state1], 1)
-    
-    dense = tf.layers.dense(inputs=whole_model, units=1024, activation=tf.nn.relu) #(1, 1024)
+
+    dense = tf.layers.dense(inputs=whole_model, units=1024, activation=tf.nn.relu)  # (1, 1024)
 
     ##################################################################
     ######################### SELF-ATTENTION #########################
     ##################################################################
-    
-    print('labels:', labels)
-    decoder_inputs = tf.concat((tf.ones_like(labels[:, :1])*2, labels[:, :-1]), -1) #(1,120)
-    print('decoder_inputs:', decoder_inputs)
-    print('decoder_inputs.shape:', decoder_inputs.shape)
 
+    decoder_inputs = tf.concat((tf.ones_like(labels[:, :1]) * 2, labels[:, :-1]), -1)  # (1,120)
 
     # Encoder
     with tf.variable_scope("encoder"):
@@ -74,13 +75,12 @@ def model_NN1(features, labels, mode):
         for i in range(6):
             with tf.variable_scope("num_blocks_{}".format(i)):
                 ### Multihead Attention
-                enc = multihead_attention(queries=enc, keys=enc, num_units=512, num_heads=8, 
+                enc = multihead_attention(queries=enc, keys=enc, num_units=512, num_heads=8,
                                           dropout_rate=0.1, is_training=True, causality=False)
 
                 ### Feed Forward
-                enc = feedforward(enc, num_units=[4*512, 512])
-                # print('enc: ', enc)
-            
+                enc = feedforward(enc, num_units=[4 * 512, 512])
+
     # Decoder
     with tf.variable_scope("decoder"):
 
@@ -95,45 +95,40 @@ def model_NN1(features, labels, mode):
             with tf.variable_scope("num_blocks_{}".format(i)):
                 ## Multihead Attention ( self-attention)
                 dec = multihead_attention(queries=dec, keys=dec, num_units=512, num_heads=8, dropout_rate=0.1,
-                                          is_training=True,causality=True, scope="self_attention")
+                                          is_training=True, causality=True, scope="self_attention")
 
                 ## Multihead Attention ( vanilla attention)
                 dec = multihead_attention(queries=dec, keys=dec, num_units=512, num_heads=8, dropout_rate=0.1,
-                                          is_training=True,causality=False, scope="vanilla_attention")
+                                          is_training=True, causality=False, scope="vanilla_attention")
 
                 ## Feed Forward
-                dec = feedforward(dec, num_units=[4*512, 512])
-                # print('dec: ', dec)
+                dec = feedforward(dec, num_units=[4 * 512, 512])
 
         # Final linear projection
         dec = tf.layers.dense(dec, 1024)
         dec = tf.reshape(dec, [1, -1])
-        # print('final dec: ', dec)        
-        
+
     ##################################################################
     ##################################################################
     ##################################################################
-    
+
     # Output Tensor Shape: [batch_size, 1024]
     dropout = tf.layers.dropout(inputs=dec, rate=0.4, training=mode == tf.estimator.ModeKeys.TRAIN)
 
-    logits = tf.layers.dense(inputs=dropout, units=480) # shape of matrix -- 120 * 4
-    print('labels.shape:', labels.shape, 'logits.shape:', logits.shape)
-
+    logits = tf.layers.dense(inputs=dropout, units=480)  # shape of matrix -- 120 * 4
 
     if mode == tf.estimator.ModeKeys.PREDICT:
         print('PREDICT')
         spec = tf.estimator.EstimatorSpec(mode=mode, predictions={"graph": logits})
-
-    print('TRAIN/EVAL')
-    loss = tf.losses.mean_squared_error(labels=labels, predictions=logits)
-    eval_metrics = {"rmse": tf.metrics.root_mean_squared_error(labels, logits)}
-    optimizer = tf.train.GradientDescentOptimizer(learning_rate=0.001)
-    train_op = optimizer.minimize(loss=loss, global_step=tf.train.get_global_step())
-    spec = tf.estimator.EstimatorSpec(mode=mode, loss=loss, train_op=train_op, eval_metric_ops=eval_metrics)
-
-    print('spec is specified')
+    else:
+        print('TRAIN/EVAL')
+        loss = tf.losses.mean_squared_error(labels=labels, predictions=logits)
+        eval_metrics = {"rmse": tf.metrics.root_mean_squared_error(labels, logits)}
+        optimizer = tf.train.GradientDescentOptimizer(learning_rate=0.001)
+        train_op = optimizer.minimize(loss=loss, global_step=tf.train.get_global_step())
+        spec = tf.estimator.EstimatorSpec(mode=mode, loss=loss, train_op=train_op, eval_metric_ops=eval_metrics)
     return spec
+
 
 def model_NN2(features, labels, mode):
     # Implement 2 seperate preprocessing of state and graph and combine them together
@@ -191,7 +186,6 @@ def model_NN2(features, labels, mode):
     else:
         onehot_labels = tf.one_hot(indices=tf.cast(labels, tf.int32), depth=10)
         loss = tf.losses.softmax_cross_entropy(onehot_labels=onehot_labels, logits=logits)
-#     print(loss.shape, onehot_labels.shape)
 
     # Configure the Training Op (for TRAIN mode)
     if mode == tf.estimator.ModeKeys.TRAIN:

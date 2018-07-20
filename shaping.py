@@ -61,6 +61,8 @@ def init_list_of_vertex(board):
 
 
 def check_next_to_bomb(graph, agent_num, current_state, privius_vertex_name, reward):
+    print(agent_num)
+    agent_num = int(agent_num)
     for bomb in list_of_sest_boobms[agent_num]:
         bomb['blast strength'] = current_state[bomb['x'] + 23, bomb['y']]
         bomb['life'] = current_state[bomb['x'] + 1, bomb['y']]

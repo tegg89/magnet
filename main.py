@@ -8,6 +8,9 @@ from model import *
 from shaping import *
 from actor_critic_nn import *
 from ddpg_agent import DdpgAgent
+from env_wrapper import EnvWrapper
+
+RANDOM_SEED = 123
 
 parser = argparse.ArgumentParser(description='ma-graph')
 parser.add_argument('--seed', type=int, default=1, metavar='S',
@@ -20,7 +23,7 @@ parser.add_argument('--max-episode-length', type=int, default=10000, metavar='M'
                     help='maximum length of an episode (default: 10000)')
 parser.add_argument('--env-name', default='PommeFFACompetition-v0', metavar='ENV',
                     help='environment to train on (default: PommeFFACompetition-v0)')
-parser.add_argument('--display', default=False, metavar='D',
+parser.add_argument('--display', default=True, metavar='D',
                     help='display the training environment.')
 
 # parser.add_argument('--no-shared', default=False, metavar='O',
@@ -39,21 +42,30 @@ parser.add_argument('--outdir', default="./output", help='Output log directory')
 # parser.add_argument('--record', action='store_true', help="Record the policy running video")
 
 def main():
+    tf.reset_default_graph()
     # Print all possible environments in the Pommerman registry
     # print(pommerman.registry)
     sess = tf.Session()
+    #sess.run(tf.global_variables_initializer())
     # sess = tf_debug.TensorBoardDebugWrapperSession(sess, 'localhost:6064')
 
     # Create a set of agents (exactly four)
+    ddpg_agent = DdpgAgent(id=3, sess=sess)
     agent_list = [
         agents.SimpleAgent(),
         agents.SimpleAgent(),
         agents.RandomAgent(),
-        DdpgAgent(id=3),
+        ddpg_agent,
         # agents.DockerAgent("pommerman/simple-agent", port=12345),
     ]
     env = pommerman.make(args.env_name, agent_list)
+    env.seed(RANDOM_SEED)
 
+
+    #print('HERE0', sess)
+    #ddpg_agent.train(sess, env)
+    #print('her2')
+    #print(9/0)
     r_sum = np.zeros(1)
 
     for i in range(args.num_steps):

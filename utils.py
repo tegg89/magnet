@@ -142,4 +142,5 @@ def state_to_matrix_with_action(obs, action):
 #           blast_strength1.shape, action.shape, action1.shape)
     result = np.concatenate((my_position1, bomb_life1, board1, bombs1, can_kick1, ammo1, blast_strength1, action1),
                             axis=0)
-    return np.asmatrix(result)
+
+    return np.asmatrix(result).flatten()
