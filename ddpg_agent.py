@@ -14,6 +14,7 @@ from GreedyPolicy import GreedyPolicy
 from ReplayBuffer import ReplayBuffer
 from env_wrapper import EnvWrapper
 import itertools
+from sklearn.model_selection import train_test_split
 
 # Base learning rate for the Actor network
 ACTOR_LEARNING_RATE = 0.0001
@@ -125,13 +126,12 @@ class DdpgAgent(agents.BaseAgent):
             self.curr_state = state_to_matrix_with_action(obs, action=self.pr_action)
 
         if self.prev_state is not None:
-<<<<<<< HEAD
             curr_state = self.curr_state
             prev_state = self.prev_state
 
             input_to_ddpg = self.__input_to_ddpg__(prev_state, curr_state)
 
-=======
+
             curr_state_matrix = self.curr_state
             prev_state_matrix = self.prev_state
 
@@ -149,7 +149,6 @@ class DdpgAgent(agents.BaseAgent):
             y_generator = self.estimator_nn1.predict(input_fn=pred_input_NN1)
             graph_predictions =  np.asmatrix(list(itertools.islice(y_generator, prev_state_matrix.shape[0]))[0]['y'])
             input_to_ddpg = np.concatenate([self.curr_state, graph_predictions], axis=1)
->>>>>>> c8b3463727dbe9572349b9696d66e1f8bfe30d0b
             print(input_to_ddpg.shape)
             # action = self.actor.predict(np.expand_dims(input_to_ddpg, 0))[0, 0]
 
@@ -313,3 +312,26 @@ class DdpgAgent(agents.BaseAgent):
                           '| Qmax: %.4f' % (episode_ave_max_q / float(cur_step)))
 
                     break
+
+    def pretrain_transformer(self, batch_size=5000, epochs=100, early_stopping=20,
+                 save_best_only=True, random_state=392, test_size=0.2, shuffle=True):
+
+        observations_merged = np.load(train_data_obs)
+        labels_merged = np.load(train_data_labels)
+        rewards_merged = np.load(train_data_reward)
+
+        # Consistent splitting
+        x_train, x_val, y_train, y_val = train_test_split(observations_merged, labels_merged, test_size=test_size,
+                                                          random_state=random_state, shuffle=shuffle)
+        # Calculate targets
+        train_input_NN1 = tf.estimator.inputs.numpy_input_fn(
+            x={"state1": x_train[0],
+               "state2": x_train[1]},
+            y=np.asmatrix(y_train),
+            batch_size=1,
+            num_epochs=None,
+            shuffle=True)
+        print('train_input_NN1 data loaded')
+
+        self.estimator_nn1.train(input_fn=train_input_NN1, steps=100)
+

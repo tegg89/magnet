@@ -29,6 +29,7 @@ MANIFEST
 .idea
 results/
 output/
+logs/
 log/
 
 # PyInstaller
