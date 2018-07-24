@@ -60,7 +60,7 @@ def model_NN1(features, labels, mode):
     ######################### SELF-ATTENTION #########################
     ##################################################################
 
-    decoder_inputs = tf.concat((tf.ones_like(labels[:, :1]) * 2, labels[:, :-1]), -1)  # (1,120)
+    decoder_inputs = tf.concat((tf.ones_like(labels[:, :1]) * 2, labels[:, :-1]), -1)  # (1,480)
 
     # Encoder
     with tf.variable_scope("encoder"):

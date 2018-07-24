@@ -24,7 +24,12 @@ wheels/
 .installed.cfg
 *.egg
 MANIFEST
+
+# MISC
 .idea
+results/
+output/
+log/
 
 # PyInstaller
 #  Usually these files are written by a python script from a template

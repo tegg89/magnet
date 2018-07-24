@@ -6,7 +6,7 @@
 
 ## Authors
 
-Tegg Taekyong Sung, Aleksandra Malysheva
+Tegg Taekyong Sung & Aleksandra Malysheva
 
 
 ## Objective
@@ -20,11 +20,18 @@ For the experiment, we will use [Pommerman](https://www.pommerman.com) environme
 
 * The proposed architectures is structured with two stages, generating graph and executing optimal actions.
 * Inspired by the [curiosity-driven paper](https://arxiv.org/abs/1705.05363), we use self-supervised prediction to infer environments. Taking previous states and actions, the first network is inferring the environment which can be generated to graph. 
-* Afterward, each agents execute the optimal actions based on the trained graph.
+* Afterward, the trained graph goes through [NerveNet](https://openreview.net/pdf?id=S1sqHMZCb) to perform action. 
+* This action value is trained using [DDPG](https://arxiv.org/abs/1509.02971) algorithm.
 * The network design of prototype is shown below.
 <p align="center">
-  <img src="https://github.com/tegg89/DLCamp_Jeju2018/blob/master/asset/prev_network.jpg?raw=true" width=70% title="network">
+  <img src="https://github.com/tegg89/DLCamp_Jeju2018/blob/master/asset/curr_network.jpg?raw=true" width=70% title="network">
 </p>
+
+
+## Dependencies
+The script has been tested running under Python 3.6.6, with the following packages installed (along with their dependencies):
+* `numpy==1.14.5`
+* `tensorflow==1.8.0`
 
 
 ## Experiments
@@ -46,20 +53,25 @@ For the experiment, we will use [Pommerman](https://www.pommerman.com) environme
 ## TODO
 
 - [x] Attach self-attention module at the graph generation
-- [ ] Substitute execution stage to Nervenet
-- [ ] Experimental comparison
+- [x] Substitute execution stage to NerveNet
 - [x] Redraw network structure
+- [ ] Experimental comparison
+- [ ] Ablation study
 - [ ] Prepare arXiv paper
 
 
 ## References
 
-* [Graph Attention Networks](https://arxiv.org/abs/1710.10903)
-* [Relational Deep Reinforcement Learning](https://arxiv.org/abs/1806.01830)
-* [Nervenet: Learning structured policy with graph neural networks](https://openreview.net/pdf?id=S1sqHMZCb)
-* [Curiosity-driven exploration by self-supervised prediction](https://arxiv.org/abs/1705.05363)
-* [PlayGround: AI research into multi-agent learning](https://github.com/MultiAgentLearning/playground)
-* [Zero-shot task generalization with multi-task deep reinforcement learning](https://arxiv.org/abs/1706.05064)
+* Graph Attention Networks [paper](https://arxiv.org/abs/1710.10903)
+* Relational Deep Reinforcement Learning [paper](https://arxiv.org/abs/1806.01830)
+* Nervenet: Learning structured policy with graph neural networks [paper](https://openreview.net/pdf?id=S1sqHMZCb)
+* Curiosity-driven exploration by self-supervised prediction [paper](https://arxiv.org/abs/1705.05363)
+* PlayGround: AI research into multi-agent learning [paper](https://github.com/MultiAgentLearning/playground)
+* Zero-shot task generalization with multi-task deep reinforcement learning [paper](https://arxiv.org/abs/1706.05064)
+* Gated graph sequence neural networks [paper](https://arxiv.org/abs/1511.05493)
+* Few-shot learning with graph neural networks [paper](https://arxiv.org/abs/1711.04043)
+* Backplay: ‘Man muss immer umkehren’ [paper](https://arxiv.org/abs/1807.06919)
+* Continuous control with deep reinforcement learning [paper](https://arxiv.org/abs/1509.02971)
 
 
 ## License

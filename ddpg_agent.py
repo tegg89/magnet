@@ -125,11 +125,31 @@ class DdpgAgent(agents.BaseAgent):
             self.curr_state = state_to_matrix_with_action(obs, action=self.pr_action)
 
         if self.prev_state is not None:
+<<<<<<< HEAD
             curr_state = self.curr_state
             prev_state = self.prev_state
 
             input_to_ddpg = self.__input_to_ddpg__(prev_state, curr_state)
 
+=======
+            curr_state_matrix = self.curr_state
+            prev_state_matrix = self.prev_state
+
+            pred_input_NN1 = tf.estimator.inputs.numpy_input_fn(
+                x={"state1": prev_state_matrix,
+                   "state2": curr_state_matrix,
+                   "y": np.asmatrix(self.graph.flatten())},
+                y=np.asmatrix(self.graph.flatten()),
+                batch_size=1,
+                num_epochs=None,
+                shuffle=False)
+
+
+            # Predict the estimator
+            y_generator = self.estimator_nn1.predict(input_fn=pred_input_NN1)
+            graph_predictions =  np.asmatrix(list(itertools.islice(y_generator, prev_state_matrix.shape[0]))[0]['y'])
+            input_to_ddpg = np.concatenate([self.curr_state, graph_predictions], axis=1)
+>>>>>>> c8b3463727dbe9572349b9696d66e1f8bfe30d0b
             print(input_to_ddpg.shape)
             # action = self.actor.predict(np.expand_dims(input_to_ddpg, 0))[0, 0]
 
