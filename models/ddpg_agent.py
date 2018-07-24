@@ -2,12 +2,13 @@ import itertools
 
 from pommerman import agents
 
-from NN1 import *
-from actor_critic_nn import *
+from models.graph_generation.NN1 import *
+from models.action_execution.NN2 import *
+from models.action_execution.actor_critic_nn import *
 from env_processing.env_wrapper import EnvWrapper
-from env_processing.shaping import *
-from greedy_policy import GreedyPolicy
-from replay_buffer import ReplayBuffer
+import env_processing.shaping
+from models.action_execution.greedy_policy import GreedyPolicy
+from models.replay_buffer import ReplayBuffer
 from utils.const import *
 
 
@@ -88,13 +89,14 @@ class DdpgAgent(agents.BaseAgent):
 
         self.prev_state = self.curr_state
         if self.pr_action is not None:
-            self.curr_state = state_to_matrix_with_action(obs, action=self.pr_action)
+            self.curr_state = env_processing.shaping.state_to_matrix_with_action(obs, action=self.pr_action)
 
         if self.prev_state is not None:
             curr_state = self.curr_state
             prev_state = self.prev_state
 
             input_to_ddpg = self.__input_to_ddpg__(prev_state, curr_state)
+
 
             curr_state_matrix = self.curr_state
             prev_state_matrix = self.prev_state
@@ -108,9 +110,10 @@ class DdpgAgent(agents.BaseAgent):
                 num_epochs=None,
                 shuffle=False)
 
+
             # Predict the estimator
             y_generator = self.estimator_nn1.predict(input_fn=pred_input_NN1)
-            graph_predictions = np.asmatrix(list(itertools.islice(y_generator, prev_state_matrix.shape[0]))[0]['y'])
+            graph_predictions =  np.asmatrix(list(itertools.islice(y_generator, prev_state_matrix.shape[0]))[0]['y'])
             input_to_ddpg = np.concatenate([self.curr_state, graph_predictions], axis=1)
             print(input_to_ddpg.shape)
             # action = self.actor.predict(np.expand_dims(input_to_ddpg, 0))[0, 0]
@@ -145,7 +148,7 @@ class DdpgAgent(agents.BaseAgent):
                 # 2. take action, see next state and reward :
                 next_state, reward, terminal, info = self.env.step(action)
 
-                graph_changed_manually, reward = reward_shaping(self.graph, next_state, state, self.agent_num)
+                graph_changed_manually, reward = env_processing.shaping.reward_shaping(self.graph, next_state, state, self.agent_num)
                 # 3. Save in replay buffer:
                 self.replay_buffer.add(state, action, reward, graph_changed_manually.flatten(), next_state)
 
@@ -277,7 +280,7 @@ class DdpgAgent(agents.BaseAgent):
                     break
 
     def pretrain_transformer(self, batch_size=5000, epochs=100, early_stopping=20,
-                             save_best_only=True, random_state=392, test_size=0.2, shuffle=True):
+                 save_best_only=True, random_state=392, test_size=0.2, shuffle=True):
 
         state_merged = np.load(train_data_state)
         prev_state_merged = np.load(train_data_state)
@@ -285,7 +288,7 @@ class DdpgAgent(agents.BaseAgent):
         labels_merged = np.load(train_data_labels)
         rewards_merged = np.load(train_data_reward)
 
-        # Calculate targets
+                # Calculate targets
         train_input_NN1 = tf.estimator.inputs.numpy_input_fn(
             x={"state1": state_merged,
                "state2": prev_state_merged},
@@ -296,3 +299,4 @@ class DdpgAgent(agents.BaseAgent):
         print('train_input_NN1 data loaded')
 
         self.estimator_nn1.train(input_fn=train_input_NN1, steps=100)
+

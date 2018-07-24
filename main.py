@@ -2,10 +2,8 @@ import argparse
 
 import pommerman
 from pommerman import agents
-
-from NN1 import *
-from actor_critic_nn import *
-from ddpg_agent import DdpgAgent
+from models.graph_generation.NN1 import *
+from models.ddpg_agent import DdpgAgent
 from env_processing.shaping import *
 from utils.const import *
 

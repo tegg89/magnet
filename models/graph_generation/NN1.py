@@ -1,4 +1,4 @@
-from transformer import *
+from models.graph_generation.transformer import *
 
 
 def model_NN1(features, labels, mode):
