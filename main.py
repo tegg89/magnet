@@ -1,12 +1,13 @@
 import argparse
+
 import pommerman
 from pommerman import agents
+
 from NN1 import *
-from env_processing.shaping import *
 from actor_critic_nn import *
 from ddpg_agent import DdpgAgent
+from env_processing.shaping import *
 from utils.const import *
-
 
 parser = argparse.ArgumentParser(description='ma-graph')
 parser.add_argument('--seed', type=int, default=1, metavar='S',
@@ -42,7 +43,7 @@ def main():
     # Print all possible environments in the Pommerman registry
     # print(pommerman.registry)
     sess = tf.Session()
-    #sess.run(tf.global_variables_initializer())
+    # sess.run(tf.global_variables_initializer())
     # sess = tf_debug.TensorBoardDebugWrapperSession(sess, 'localhost:6064')
 
     # Create a set of agents (exactly four)
@@ -57,11 +58,10 @@ def main():
     env = pommerman.make(args.env_name, agent_list)
     env.seed(RANDOM_SEED)
 
-
     print('HERE0', sess)
     ddpg_agent.train_transformer(sess, env)
     print('her2')
-    print(9/0)
+    print(9 / 0)
     r_sum = np.zeros(1)
 
     for i in range(args.num_steps):

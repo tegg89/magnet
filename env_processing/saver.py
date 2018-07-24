@@ -1,10 +1,12 @@
-from copy import deepcopy
 import argparse
+from copy import deepcopy
+
 import pommerman
 from pommerman import agents
-from env_processing.shaping import *
+
 from actor_critic_nn import *
 from env_processing.env_wrapper import EnvWrapper
+from env_processing.shaping import *
 
 RANDOM_SEED = 123
 
@@ -22,6 +24,7 @@ parser.add_argument('--env-name', default='PommeFFACompetition-v0', metavar='ENV
 parser.add_argument('--display', default=True, metavar='D',
                     help='display the training environment.')
 parser.add_argument('--outdir', default="./output", help='Output log directory')
+
 
 class Episode:
     def __init__(self, agent_id, episode_id):
@@ -42,6 +45,7 @@ class Episode:
 
     def get_num_steps(self):
         return len(self.observations)
+
 
 # Environment wrapper
 class save_episodes:
@@ -84,6 +88,7 @@ class save_episodes:
     def get_episodes(self):
         return deepcopy(self.episodes)
 
+
 def main():
     # Instantiate the environment
     agent_list = [
@@ -118,6 +123,7 @@ def main():
     np.save(train_data_obs, observations_merged)
     np.save(train_data_labels, actions_merged)
     np.save(train_data_reward, rewards_merged)
+
 
 if __name__ == '__main__':
     args = parser.parse_args()

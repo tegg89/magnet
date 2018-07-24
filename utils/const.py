@@ -1,9 +1,8 @@
 import datetime
-import tensorflow as tf
-import numpy as np
 import os
 
-
+import numpy as np
+import tensorflow as tf
 
 RANDOM_SEED = 123
 
@@ -39,18 +38,16 @@ OUTPUT_DIR = "./output"
 
 ####### NervNet ######
 tf.logging.set_verbosity(tf.logging.INFO)
-NUM_HIDDEN= 20
+NUM_HIDDEN = 20
 vertexes_mask = np.zeros((1, 120))
 vertexes_mask[0, 0], vertexes_mask[0, 3], vertexes_mask[0, 118] = 1, 1, 1
 
 #### saver ####
-train_data_path    = './dataset/'
-train_data_state     = os.path.join(train_data_path, 'state.npy')
-train_data_prev_state     = os.path.join(train_data_path, 'prev_state.npy')
-train_data_labels  = os.path.join(train_data_path, 'labels.npy')
-train_data_reward  = os.path.join(train_data_path, 'reward.npy')
-
-
+train_data_path = './dataset/'
+train_data_state = os.path.join(train_data_path, 'state.npy')
+train_data_prev_state = os.path.join(train_data_path, 'prev_state.npy')
+train_data_labels = os.path.join(train_data_path, 'labels.npy')
+train_data_reward = os.path.join(train_data_path, 'reward.npy')
 
 ### Actor-Critic ###
 HIDDEN_1 = 400

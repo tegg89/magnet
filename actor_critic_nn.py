@@ -1,21 +1,28 @@
-import tensorflow as tf
-import numpy as np
 import tensorflow.contrib.slim as slim
 from utils.const import *
+import tensorflow.contrib.slim as slim
+
+from utils.const import *
+
 
 def discretize(value, num_actions):
     discretization = tf.round(value)
-    discretization = tf.minimum(tf.constant(num_actions-1, dtype=tf.float32), tf.maximum(tf.constant(0, dtype=tf.float32), tf.to_float(discretization)))
+    discretization = tf.minimum(tf.constant(num_actions - 1, dtype=tf.float32),
+                                tf.maximum(tf.constant(0, dtype=tf.float32), tf.to_float(discretization)))
     return tf.to_int32(discretization)
 
-def fully_connected(inputs, output_size, activation_fn=None, weights_initializer=tf.truncated_normal_initializer(),\
-        weights_regularizer=tf.contrib.layers.l2_regularizer(0.001), biases_initializer=tf.constant_initializer(0.0)):
+
+def fully_connected(inputs, output_size, activation_fn=None, weights_initializer=tf.truncated_normal_initializer(), \
+                    weights_regularizer=tf.contrib.layers.l2_regularizer(0.001),
+                    biases_initializer=tf.constant_initializer(0.0)):
     return tf.contrib.layers.fully_connected(inputs, output_size, activation_fn=activation_fn, \
-            weights_initializer=weights_initializer, weights_regularizer=weights_regularizer, biases_initializer=biases_initializer)
+                                             weights_initializer=weights_initializer,
+                                             weights_regularizer=weights_regularizer,
+                                             biases_initializer=biases_initializer)
+
 
 def batch_norm(inputs, phase):
     return tf.contrib.layers.batch_norm(inputs, center=True, scale=True, is_training=phase)
-
 
 
 class ActorNetwork(object):
@@ -26,7 +33,7 @@ class ActorNetwork(object):
     between -2 and 2
     """
 
-    def __init__(self, sess, state_dim, action_dim,  learning_rate, tau):
+    def __init__(self, sess, state_dim, action_dim, learning_rate, tau):
         self.sess = sess
         self.s_dim = state_dim
         self.a_dim = action_dim
@@ -157,7 +164,7 @@ class CriticNetwork(object):
             [self.target_network_params[i].assign(
                 tf.multiply(self.network_params[i], self.tau) + tf.multiply(self.target_network_params[i],
                                                                             1. - self.tau))
-             for i in range(len(self.target_network_params))]
+                for i in range(len(self.target_network_params))]
 
         # Network target (y_i)
         self.predicted_q_value = tf.placeholder(tf.float32, [None, 1])
@@ -201,7 +208,8 @@ class CriticNetwork(object):
         l2Flat = tf.reshape(slim.flatten(l2), [self.batch_size, trainLength, self.h_size])
         state_in = cell.zero_state(self.batch_size, tf.float32)
 
-        rnn, rnn_state = tf.nn.dynamic_rnn(cell=cell, inputs=l2Flat, dtype=tf.float32, initial_state=state_in, scope=scope)
+        rnn, rnn_state = tf.nn.dynamic_rnn(cell=cell, inputs=l2Flat, dtype=tf.float32, initial_state=state_in,
+                                           scope=scope)
         rnn = tf.reshape(rnn, shape=[-1, self.h_size])
 
         # output layer

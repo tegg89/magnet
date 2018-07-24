@@ -1,15 +1,11 @@
-import numpy as np
-import tensorflow as tf
 import argparse
 
 import pommerman
+from actor_critic_nn.py import *
 from pommerman import agents
 
-from utils import *
-from transformer import *
 from NN1 import *
 from env_processing.shaping import *
-from actor_critic_nn.py import *
 
 parser = argparse.ArgumentParser(description='ma-graph')
 parser.add_argument('--seed', type=int, default=1, metavar='S',

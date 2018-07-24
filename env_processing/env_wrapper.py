@@ -1,10 +1,8 @@
-import numpy as np
 from gym import Env
-from utils import *
-from NN1 import *
-from env_processing.shaping import *
 
-OBSERVATION_SPASE = 38*11
+OBSERVATION_SPASE = 38 * 11
+
+
 class EnvWrapper(Env):
     """The abstract environment class that is used by all agents. This class has the exact
         same API that OpenAI Gym uses so that integrating with it is trivial. In contrast to the

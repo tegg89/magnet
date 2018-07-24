@@ -1,11 +1,13 @@
 """
 Data structure for implementing experience replay
 """
-from collections import deque, namedtuple
 import random
+from collections import deque, namedtuple
+
 import numpy as np
 
 Transition = namedtuple('Transition', ['state', 'action', 'reward', 'terminal', 'next_state'])
+
 
 class ReplayBuffer(object):
 

@@ -1,11 +1,11 @@
 import itertools
 import json
-import random
 import os
-from jsonmerge import Merger
+import random
 
-from gym import spaces
 import numpy as np
+from gym import spaces
+from jsonmerge import Merger
 
 from utils.constants import *
 
@@ -202,7 +202,7 @@ def is_valid_direction(board, position, direction, invalid_values=None):
 
     if constants.Action(direction) == constants.Action.Right:
         return col + 1 < len(board[0]) and \
-            board[row][col+1] not in invalid_values
+               board[row][col + 1] not in invalid_values
 
     raise constants.InvalidAction("We did not receive a valid direction: ",
                                   direction)
@@ -238,7 +238,7 @@ def position_is_powerup(board, position):
 
 def position_is_wall(board, position):
     return position_is_rigid(board, position) or \
-        position_is_wood(board, position)
+           position_is_wood(board, position)
 
 
 def position_is_passage(board, position):
@@ -331,6 +331,7 @@ def get_next_position(position, direction):
 def make_np_float(feature):
     return np.array(feature).astype(np.float32)
 
+
 def join_json_state(record_json_dir, agents, finished_at, config):
     jsonSchema = {
         "properties": {
@@ -354,11 +355,11 @@ def join_json_state(record_json_dir, agents, finished_at, config):
         for name in files:
             path = os.path.join(record_json_dir, name)
             if name.endswith('.json') and "game_state" not in name:
-                with open(path) as data_file:    
+                with open(path) as data_file:
                     data = json.load(data_file)
-                    head = {"state":[data]}
+                    head = {"state": [data]}
                     base = merger.merge(base, head)
-    
+
     with open(os.path.join(record_json_dir, 'game_state.json'), 'w') as f:
         f.write(json.dumps(base, sort_keys=True, indent=4))
 
@@ -366,6 +367,3 @@ def join_json_state(record_json_dir, agents, finished_at, config):
         for name in files:
             if "game_state" not in name:
                 os.remove(os.path.join(record_json_dir, name))
-    
-
-    

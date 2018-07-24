@@ -1,6 +1,5 @@
-import tensorflow as tf
-
 from transformer import *
+
 
 def model_NN2(features, labels, mode):
     # Implement 2 seperate preprocessing of state and graph and combine them together

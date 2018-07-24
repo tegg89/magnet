@@ -1,61 +1,69 @@
-import numpy as np
 from enum import Enum
 
+import numpy as np
+
+
 class Item(Enum):
-	"""The Items in the game.
+    """The Items in the game.
 
-	When picked up:
-	  - ExtraBomb increments the agent's ammo by 1.
-	  - IncrRange increments the agent's blast strength by 1.
-	  - Kick grants the agent the ability to kick items.
+    When picked up:
+      - ExtraBomb increments the agent's ammo by 1.
+      - IncrRange increments the agent's blast strength by 1.
+      - Kick grants the agent the ability to kick items.
 
-	AgentDummy is used by team games to denote the third enemy and by ffa to
-	denote the teammate.
-	"""
-	Passage = 0
-	Rigid = 1
-	Wood = 2
-	Bomb = 3
-	Flames = 4
-	Fog = 5
-	ExtraBomb = 6
-	IncrRange = 7
-	Kick = 8
-	AgentDummy = 9
-	Agent0 = 10
-	Agent1 = 11
-	Agent2 = 12
-	Agent3 = 13
-    
+    AgentDummy is used by team games to denote the third enemy and by ffa to
+    denote the teammate.
+    """
+    Passage = 0
+    Rigid = 1
+    Wood = 2
+    Bomb = 3
+    Flames = 4
+    Fog = 5
+    ExtraBomb = 6
+    IncrRange = 7
+    Kick = 8
+    AgentDummy = 9
+    Agent0 = 10
+    Agent1 = 11
+    Agent2 = 12
+    Agent3 = 13
+
+
 def state_to_matrix(obs):
-    #In this implementation I just concatenate everything in one big matrix
+    # In this implementation I just concatenate everything in one big matrix
 
-    #for e in obs['enemies']:
+    # for e in obs['enemies']:
     #    print(e)
     #    print(Item(e))
-    #TODO enemies
+    # TODO enemies
     my_position = np.asmatrix(obs['position'])
     bomb_life = np.asmatrix(obs['bomb_life'])
     board = np.asmatrix(obs['board'])
     bombs = np.asmatrix(obs['bomb_blast_strength'])
-    #enemies = np.asmatrix([Item_en(e) for e in obs['enemies']])
+    # enemies = np.asmatrix([Item_en(e) for e in obs['enemies']])
     can_kick = np.asmatrix(int(1 if obs['can_kick'] else 0))
     ammo = np.asmatrix(int(obs['ammo']))
     blast_strength = np.asmatrix(int(obs['blast_strength']))
 
-    m = np.max([my_position.shape[1], bomb_life.shape[1], board.shape[1], bombs.shape[1],  can_kick.shape[1], ammo.shape[1], blast_strength.shape[1]])
+    m = np.max(
+        [my_position.shape[1], bomb_life.shape[1], board.shape[1], bombs.shape[1], can_kick.shape[1], ammo.shape[1],
+         blast_strength.shape[1]])
 
-    my_position1 = np.concatenate((my_position, np.zeros(( my_position.shape[0], m - my_position.shape[1]))), axis=1)
+    my_position1 = np.concatenate((my_position, np.zeros((my_position.shape[0], m - my_position.shape[1]))), axis=1)
     bomb_life1 = np.concatenate((bomb_life, np.zeros((bomb_life.shape[0], m - bomb_life.shape[1]))), axis=1)
     board1 = np.concatenate((board, np.zeros((board.shape[0], m - board.shape[1]))), axis=1)
     bombs1 = np.concatenate((bombs, np.zeros((bombs.shape[0], m - bombs.shape[1]))), axis=1)
-    #enemies1 = np.concatenate((enemies, np.zeros((enemies.shape[0], m - enemies.shape[1]))), axis=1)
+    # enemies1 = np.concatenate((enemies, np.zeros((enemies.shape[0], m - enemies.shape[1]))), axis=1)
     can_kick1 = np.concatenate((can_kick, np.zeros((can_kick.shape[0], m - can_kick.shape[1]))), axis=1)
     ammo1 = np.concatenate((ammo, np.zeros((ammo.shape[0], m - ammo.shape[1]))), axis=1)
-    blast_strength1 = np.concatenate((blast_strength, np.zeros((blast_strength.shape[0], m - blast_strength.shape[1]))), axis=1)
+    blast_strength1 = np.concatenate((blast_strength, np.zeros((blast_strength.shape[0], m - blast_strength.shape[1]))),
+                                     axis=1)
 
-    result = np.concatenate((my_position1, bomb_life1, board1, board1, bombs1, can_kick1, ammo1, blast_strength1), axis=0)
+    result = np.concatenate((my_position1, bomb_life1, board1, board1, bombs1, can_kick1, ammo1, blast_strength1),
+                            axis=0)
     return np.asmatrix(result)
+
 
 # def state_to_matrixes(obs):
 #     #In this implementation I put all vector in matrix and concatenate this matrixes
@@ -125,7 +133,8 @@ def state_to_matrix_with_action(obs, action):
     ammo = np.asmatrix(int(obs['ammo']))
     blast_strength = np.asmatrix(int(obs['blast_strength']))
 
-    m = np.max([my_position.shape[1], bomb_life.shape[1], board.shape[1], bombs.shape[1], can_kick.shape[1], ammo.shape[1],
+    m = np.max(
+        [my_position.shape[1], bomb_life.shape[1], board.shape[1], bombs.shape[1], can_kick.shape[1], ammo.shape[1],
          blast_strength.shape[1]])
 
     my_position1 = np.concatenate((my_position, np.zeros((my_position.shape[0], m - my_position.shape[1]))), axis=1)
@@ -135,11 +144,12 @@ def state_to_matrix_with_action(obs, action):
     # enemies1 = np.concatenate((enemies, np.zeros((enemies.shape[0], m - enemies.shape[1]))), axis=1)
     can_kick1 = np.concatenate((can_kick, np.zeros((can_kick.shape[0], m - can_kick.shape[1]))), axis=1)
     ammo1 = np.concatenate((ammo, np.zeros((ammo.shape[0], m - ammo.shape[1]))), axis=1)
-    blast_strength1 = np.concatenate((blast_strength, np.zeros((blast_strength.shape[0], m - blast_strength.shape[1]))), axis=1)
+    blast_strength1 = np.concatenate((blast_strength, np.zeros((blast_strength.shape[0], m - blast_strength.shape[1]))),
+                                     axis=1)
     action = np.asmatrix(action)
     action1 = np.concatenate((action, np.zeros((action.shape[0], m - action.shape[1]))), axis=1)
-#     print(my_position1.shape, bomb_life1.shape, board1.shape, bombs1.shape, can_kick1.shape, ammo1.shape,
-#           blast_strength1.shape, action.shape, action1.shape)
+    #     print(my_position1.shape, bomb_life1.shape, board1.shape, bombs1.shape, can_kick1.shape, ammo1.shape,
+    #           blast_strength1.shape, action.shape, action1.shape)
     result = np.concatenate((my_position1, bomb_life1, board1, bombs1, can_kick1, ammo1, blast_strength1, action1),
                             axis=0)
 

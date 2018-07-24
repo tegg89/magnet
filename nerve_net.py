@@ -7,7 +7,7 @@ import tensorflow as tf
 from tensorflow.contrib import rnn
 
 tf.logging.set_verbosity(tf.logging.INFO)
-NUM_HIDDEN= 20
+NUM_HIDDEN = 20
 vertexes_mask = np.zeros((1, 120))
 vertexes_mask[0, 0], vertexes_mask[0, 3], vertexes_mask[0, 118] = 1, 1, 1
 
