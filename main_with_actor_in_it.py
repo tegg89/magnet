@@ -7,8 +7,8 @@ from pommerman import agents
 
 from utils import *
 from transformer import *
-from model import *
-from shaping import *
+from NN1 import *
+from env_processing.shaping import *
 from actor_critic_nn.py import *
 
 parser = argparse.ArgumentParser(description='ma-graph')
@@ -28,17 +28,6 @@ parser.add_argument('--env-name', default='PommeFFACompetition-v0', metavar='ENV
                     help='environment to train on (default: PommeFFACompetition-v0)')
 parser.add_argument('--display', default=False, metavar='D',
                     help='display the training environment.')
-
-# parser.add_argument('--no-shared', default=False, metavar='O',
-#                     help='use an optimizer without shared momentum.')
-# ####################
-# parser.add_argument('--eta', type=float, default=0.01, metavar='LR',
-#                     help='scaling factor for intrinsic reward')
-# parser.add_argument('--beta', type=float, default=0.2, metavar='LR',
-#                     help='balance between inverse & forward')
-# parser.add_argument('--lmbda', type=float, default=0.1, metavar='LR',
-#                     help='lambda : balance between A3C & icm')
-
 parser.add_argument('--outdir', default="./output", help='Output log directory')
 
 

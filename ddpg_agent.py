@@ -1,49 +1,12 @@
-import datetime
-
-import numpy as np
-import tensorflow as tf
-import argparse
-import pommerman
-from pommerman import agents
-from utils import *
-from model import *
-from shaping import *
+from NN1 import *
+from env_processing.shaping import *
 from actor_critic_nn import *
 from pommerman import agents
 from greedy_policy import GreedyPolicy
 from replay_buffer import ReplayBuffer
-from env_wrapper import EnvWrapper
+from env_processing.env_wrapper import EnvWrapper
 import itertools
-from sklearn.model_selection import train_test_split
-
-# Base learning rate for the Actor network
-ACTOR_LEARNING_RATE = 0.0001
-# Base learning rate for the Critic Network
-CRITIC_LEARNING_RATE = 0.001
-# Soft target update param
-TAU = 0.001
-MAX_EPISODES = 100000
-MAX_STEPS_EPISODE = 50000
-WARMUP_STEPS = 10000
-EXPLORATION_EPISODES = 10000
-GAMMA = 0.99
-BUFFER_SIZE = 1000000
-OU_THETA = 0.15
-OU_MU = 0.
-OU_SIGMA = 0.3
-MIN_EPSILON = 0.1
-MAX_EPSILON = 1
-EVAL_PERIODS = 100
-EVAL_EPISODES = 10
-MINI_BATCH = 64
-RANDOM_SEED = 123
-ACTION_DIM = 1
-STATE_DIM = 38 * 11
-EXPLORE = 70
-DATETIME = datetime.datetime.now().strftime('%Y%m%d%H%M%S')
-SUMMARY_DIR = './results/{}/tf_ddpg'.format(DATETIME)
-
-OUTPUT_DIR = "./output"
+from utils.const import *
 
 
 class DdpgAgent(agents.BaseAgent):
@@ -316,18 +279,17 @@ class DdpgAgent(agents.BaseAgent):
     def pretrain_transformer(self, batch_size=5000, epochs=100, early_stopping=20,
                  save_best_only=True, random_state=392, test_size=0.2, shuffle=True):
 
-        observations_merged = np.load(train_data_obs)
+        state_merged = np.load(train_data_state)
+        prev_state_merged = np.load(train_data_state)
+
         labels_merged = np.load(train_data_labels)
         rewards_merged = np.load(train_data_reward)
 
-        # Consistent splitting
-        x_train, x_val, y_train, y_val = train_test_split(observations_merged, labels_merged, test_size=test_size,
-                                                          random_state=random_state, shuffle=shuffle)
-        # Calculate targets
+                # Calculate targets
         train_input_NN1 = tf.estimator.inputs.numpy_input_fn(
-            x={"state1": x_train[0],
-               "state2": x_train[1]},
-            y=np.asmatrix(y_train),
+            x={"state1": state_merged,
+               "state2": prev_state_merged},
+            y=np.asmatrix(labels_merged),
             batch_size=1,
             num_epochs=None,
             shuffle=True)

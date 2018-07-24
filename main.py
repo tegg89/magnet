@@ -1,16 +1,12 @@
-import numpy as np
-import tensorflow as tf
 import argparse
 import pommerman
 from pommerman import agents
-from utils import *
-from model import *
-from shaping import *
+from NN1 import *
+from env_processing.shaping import *
 from actor_critic_nn import *
 from ddpg_agent import DdpgAgent
-from env_wrapper import EnvWrapper
+from utils.const import *
 
-RANDOM_SEED = 123
 
 parser = argparse.ArgumentParser(description='ma-graph')
 parser.add_argument('--seed', type=int, default=1, metavar='S',

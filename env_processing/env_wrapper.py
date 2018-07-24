@@ -1,8 +1,8 @@
 import numpy as np
 from gym import Env
 from utils import *
-from model import *
-from shaping import *
+from NN1 import *
+from env_processing.shaping import *
 
 OBSERVATION_SPASE = 38*11
 class EnvWrapper(Env):

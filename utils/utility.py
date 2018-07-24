@@ -7,7 +7,7 @@ from jsonmerge import Merger
 from gym import spaces
 import numpy as np
 
-import constants
+from utils.constants import *
 
 
 class PommermanJSONEncoder(json.JSONEncoder):
@@ -15,9 +15,9 @@ class PommermanJSONEncoder(json.JSONEncoder):
     def default(self, obj):
         if isinstance(obj, np.ndarray):
             return obj.tolist()
-        elif isinstance(obj, constants.Item):
+        elif isinstance(obj, Item):
             return obj.value
-        elif isinstance(obj, constants.Action):
+        elif isinstance(obj, Action):
             return obj.value
         elif isinstance(obj, np.int64):
             return int(obj)

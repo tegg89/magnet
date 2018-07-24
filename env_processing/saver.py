@@ -1,15 +1,10 @@
 from copy import deepcopy
-import numpy as np
-import tensorflow as tf
 import argparse
 import pommerman
 from pommerman import agents
-from utils import *
-from model import *
-from shaping import *
+from env_processing.shaping import *
 from actor_critic_nn import *
-from ddpg_agent import DdpgAgent
-from env_wrapper import EnvWrapper
+from env_processing.env_wrapper import EnvWrapper
 
 RANDOM_SEED = 123
 

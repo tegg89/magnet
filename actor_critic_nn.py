@@ -1,10 +1,7 @@
 import tensorflow as tf
 import numpy as np
 import tensorflow.contrib.slim as slim
-
-HIDDEN_1 = 400
-HIDDEN_2 = 300
-ACTION_BOUND = 7
+from utils.const import *
 
 def discretize(value, num_actions):
     discretization = tf.round(value)
