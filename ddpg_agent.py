@@ -10,8 +10,8 @@ from model import *
 from shaping import *
 from actor_critic_nn import *
 from pommerman import agents
-from GreedyPolicy import GreedyPolicy
-from ReplayBuffer import ReplayBuffer
+from greedy_policy import GreedyPolicy
+from replay_buffer import ReplayBuffer
 from env_wrapper import EnvWrapper
 import itertools
 from sklearn.model_selection import train_test_split
