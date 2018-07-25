@@ -55,8 +55,8 @@ The script has been tested running under Python 3.6.6, with the following packag
 - [x] Attach self-attention module at the graph generation
 - [x] Substitute execution stage to NerveNet
 - [x] Redraw network structure
-- [ ] Experimental comparison
-- [ ] Ablation study
+- [x] Experimental comparison
+- [x] Ablation study
 - [ ] Prepare arXiv paper
 
 

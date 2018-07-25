@@ -2,7 +2,7 @@ import itertools
 
 from pommerman import agents
 
-from models.graph_generation.NN1 import *
+from models.graph_construction.NN1 import *
 from models.action_execution.NN2 import *
 from models.action_execution.actor_critic_nn import *
 from env_processing.env_wrapper import EnvWrapper

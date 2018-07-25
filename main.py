@@ -2,7 +2,7 @@ import argparse
 
 import pommerman
 from pommerman import agents
-from models.graph_generation.NN1 import *
+from models.graph_construction.NN1 import *
 from models.ddpg_agent import DdpgAgent
 from env_processing.shaping import *
 from utils_for_game.const import *
