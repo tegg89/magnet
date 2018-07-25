@@ -1,10 +1,11 @@
 import argparse
 
 import pommerman
-from actor_critic_nn.py import *
+from models.action_execution.actor_critic_nn import *
 from pommerman import agents
-
-from NN1 import *
+from utils_for_game.utils import *
+from models.graph_generation.NN1 import *
+from models.action_execution.NN2 import *
 from env_processing.shaping import *
 
 parser = argparse.ArgumentParser(description='ma-graph')
@@ -22,7 +23,7 @@ parser.add_argument('--random_seed', type=int, default=123, metavar='M',
                     help='random seed  (default: 123)')
 parser.add_argument('--env-name', default='PommeFFACompetition-v0', metavar='ENV',
                     help='environment to train on (default: PommeFFACompetition-v0)')
-parser.add_argument('--display', default=False, metavar='D',
+parser.add_argument('--display', default=True, metavar='D',
                     help='display the training environment.')
 parser.add_argument('--outdir', default="./output", help='Output log directory')
 
@@ -39,8 +40,8 @@ def main():
     agent_list = [
         agents.SimpleAgent(),
         agents.SimpleAgent(),
-        agents.RandomAgent(),
-        agents.RandomAgent(),
+        agents.SimpleAgent(),
+        agents.SimpleAgent(),
         # agents.DockerAgent("pommerman/simple-agent", port=12345),
     ]
     env = pommerman.make(args.env_name, agent_list)
@@ -90,7 +91,7 @@ def main():
 
             actions = env.act(state)
             state, reward, done, info = env.step(actions)
-            r_sum[i] += reward[0]
+            #r_sum[i] += reward[0]
 
             # as basic implementation I consider only one agent
             prev_state = curr_state
@@ -144,8 +145,8 @@ def main():
     print('Game {} finished'.format(i))
 
 
-np.savetxt(args.outdir + '/result_2simple_2random.csv', r_sum, fmt='%1.4e')
-env.close()
+    #np.savetxt(args.outdir + '/result_2simple_2random.csv', r_sum, fmt='%1.4e')
+    #env.close()
 
 if __name__ == '__main__':
     args = parser.parse_args()

@@ -9,8 +9,8 @@ from env_processing.env_wrapper import EnvWrapper
 import env_processing.shaping
 from models.action_execution.greedy_policy import GreedyPolicy
 from models.replay_buffer import ReplayBuffer
-from utils.const import *
-
+from utils_for_game.const import *
+from utils_for_game.utils import *
 
 class DdpgAgent(agents.BaseAgent):
     """The Random Agent that returns random actions given an action_space."""

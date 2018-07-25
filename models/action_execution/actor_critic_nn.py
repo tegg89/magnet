@@ -1,8 +1,5 @@
 import tensorflow.contrib.slim as slim
-from utils.const import *
-import tensorflow.contrib.slim as slim
-
-from utils.const import *
+from utils_for_game.const import *
 
 
 def discretize(value, num_actions):

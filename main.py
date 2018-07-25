@@ -5,13 +5,13 @@ from pommerman import agents
 from models.graph_generation.NN1 import *
 from models.ddpg_agent import DdpgAgent
 from env_processing.shaping import *
-from utils.const import *
+from utils_for_game.const import *
+from utils_for_game.utils import *
+
 
 parser = argparse.ArgumentParser(description='ma-graph')
 parser.add_argument('--seed', type=int, default=1, metavar='S',
                     help='random seed (default: 1)')
-# parser.add_argument('--num-processes', type=int, default=4, metavar='N',
-#                     help='how many training processes to use (default: 4)')
 parser.add_argument('--num-steps', type=int, default=20, metavar='NS',
                     help='number of forward steps in ma-graph (default: 20)')
 parser.add_argument('--max-episode-length', type=int, default=10000, metavar='M',
@@ -20,17 +20,6 @@ parser.add_argument('--env-name', default='PommeFFACompetition-v0', metavar='ENV
                     help='environment to train on (default: PommeFFACompetition-v0)')
 parser.add_argument('--display', default=True, metavar='D',
                     help='display the training environment.')
-
-# parser.add_argument('--no-shared', default=False, metavar='O',
-#                     help='use an optimizer without shared momentum.')
-# ####################
-# parser.add_argument('--eta', type=float, default=0.01, metavar='LR',
-#                     help='scaling factor for intrinsic reward')
-# parser.add_argument('--beta', type=float, default=0.2, metavar='LR',
-#                     help='balance between inverse & forward')
-# parser.add_argument('--lmbda', type=float, default=0.1, metavar='LR',
-#                     help='lambda : balance between A3C & icm')
-
 parser.add_argument('--outdir', default="./output", help='Output log directory')
 
 

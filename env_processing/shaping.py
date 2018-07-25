@@ -151,7 +151,7 @@ def reward_shaping(graph, curr_state, prev_state, agent_num):
     # increase ammo
     if prev_state[35, 0] < curr_state[35, 0]:
         print(agent_num, " increase ammo")
-        graph[agent_num, prev_x * 11 + prev_y] = 10  # set edge between increase ammo power up and adjent as 10
+        graph[agent_num, (prev_x * 11 + prev_y) % 120] = 10  # set edge between increase ammo power up and adjent as 10
         reward += REWARD_FOR_INCREASING_AMMO
 
     # increase blast power
