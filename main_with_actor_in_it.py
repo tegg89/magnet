@@ -4,7 +4,7 @@ import pommerman
 from models.action_execution.actor_critic_nn import *
 from pommerman import agents
 from utils_for_game.utils import *
-from models.graph_generation.NN1 import *
+from models.graph_construction.NN1 import *
 from models.action_execution.NN2 import *
 from env_processing.shaping import *
 
