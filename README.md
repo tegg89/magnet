@@ -18,78 +18,99 @@ For the experiment, we will use [Pommerman](https://www.pommerman.com) environme
 ## Proposed methods
 
 * The proposed architectures is structured with two stages, graph construction and optimal action execution.
+
 * Inspired by the [curiosity-driven paper](https://arxiv.org/abs/1705.05363), we use self-supervised prediction to infer environments, constructing graph matrix. Taking the concatenation of previous states and actions, the graph is constructed. This stage is solving a regression problem in supervised learning.
+
 * Afterward, the trained graph goes through [NerveNet](https://openreview.net/pdf?id=S1sqHMZCb) to perform an action. Also, the graph goes to MLP with concatenated state and action value to produce action value. Those two values are compared and trained using [DDPG](https://arxiv.org/abs/1509.02971) algorithm. 
+
 * The design of the network is shown below. 
+
 <p align="center">
   <img src="https://github.com/tegg89/magnn/blob/master/asset/processing_results/paper/curr-network.png?raw=true" width=70% title="network">
 </p>
 
 
 ## Dependencies
+
 The script has been tested running under Python 3.6.6, with the following packages installed (along with their dependencies):
+
 * `numpy==1.14.5`
+
 * `tensorflow==1.8.0`
 
 
 ## Experiments
 
 ### 1. Environements
+
 * [Pommerman](https://github.com/MultiAgentLearning/playground) is sponsored by NVIDIA, FAIR, and Google AI.
+
 * For each agent: 372 observation spaces (board, bomb_blast strength, bomb_life, position, blast strength, can kick, teammate, ammo, enemies) & 6 action spaces (up, down, right, left, bomb, stop)
+
 * Free for all & Team match modes are available.
 
 <p align="center">
-  <img src="https://github.com/tegg89/DLCamp_Jeju2018/blob/master/asset/pommerman.png?raw=true" width=60% title="pommerman">
+  <img src="https://github.com/tegg89/DLCamp_Jeju2018/blob/master/asset/pommerman.png?raw=true" width=40% title="pommerman">
 </p>
 
 ### 2. Results
 
-#### 2-1. 
+#### 2-1. Overall algorithm comparison
 
-#### 2-2. Overall algorithm comparison
 <p align="center">
-  <img src="https://github.com/tegg89/magnn/blob/master/asset/processing_results/paper/algcomp-n-magnn-gc.png?raw=true" width=60% title="results-overall">
+  <img src="https://github.com/tegg89/magnn/blob/master/asset/processing_results/paper/algcomp-n-magnn-gc.png?raw=true" width=70% title="results-overall">
 </p>
+
 * Top graph shows the performance of theproposed model and other RL algorithms. 
+
 * Bottom graph shows the effectiveness of graph construction. 
+
 * Team match and free-for-all modes are tested, and with the graph construction modules gain the better performance.
 
-#### 2-3. Ablation studies
+#### 2-2. Ablation studies
 
 The detail parameters of algorithms (A1~A12) shows in the paper.
 
 
-*Self-attention experiments*
+**Self-attention experiments**
 
 <p align="center">
-  <img src="https://github.com/tegg89/magnn/blob/master/asset/processing_results/paper/nn1-team-selfattn-n-teamagent-s-a.png?raw=true" width=60% title="results-sa">
+  <img src="https://github.com/tegg89/magnn/blob/master/asset/processing_results/paper/nn1-team-selfattn-n-teamagent-s-a.png?raw=true" width=80% title="results-sa">
 </p>
+
 * Left graph shows the effectiveness of self-attention module based on the shared graph. A1~A3 are vanilla networks without self-attention module, and A4 & A5 are models with the self-attention module. 
+
 * Right graph shows the self-attention tests based on individual graphs per agents. A10~A12 show the models with the self-attention module, and A13 shows the model without the module.
+
 * Also, the model with self-attention module has better performance on graph regression problem.
 
 
-*Hyperparameter experiments*
+**Hyperparameter experiments**
 
 <p align="center">
-  <img src="https://github.com/tegg89/magnn/blob/master/asset/processing_results/paper/nn1-team-n-agent.png?raw=true" width=60% title="results-param">
+  <img src="https://github.com/tegg89/magnn/blob/master/asset/processing_results/paper/nn1-team-n-agent.png?raw=true" width=80% title="results-param">
 </p>
+
 * Left graph shows the experiment of self-attention in graph construction stage.
+
 * Right graph shows the experiment of the way of constructing graph. A1~A3 refer to shared graph, and A10~A12 refer to individual graphs per agents.
 
-*Graph evaluations*
+**Graph evaluations**
 
 <p align="center">
-  <img src="https://github.com/tegg89/magnn/blob/master/asset/processing_results/paper/graph-evaluation.png?raw=true" width=60% title="results-param">
+  <img src="https://github.com/tegg89/magnn/blob/master/asset/processing_results/paper/graph-evaluation.png?raw=true" width=80% title="results-param">
 </p>
+
 * We experimented with an effectiveness of shared and individual graphs. We set individual graphs per agents to the opposite side and take the shared graph to the allied side. As we training the model, the shared graph has better performance over separated ones.
 
 <p align="center">
-  <img src="https://github.com/tegg89/magnn/blob/master/asset/processing_results/paper/graph-vis.png?raw=true" width=60% title="results-param">
+  <img src="https://github.com/tegg89/magnn/blob/master/asset/processing_results/paper/graph-vis.png?raw=true" width=80% title="results-param">
 </p>
+
 * The visualizations of constructed graphs are shown in this result. The left graph shows the team mode, whereas the right graph shows the free-for-all mode. 
+
 * At the beginning of the game (top), the graph is ordered with same structures.
+
 * In the middle of the game (bottom), trained graphs have different structures.
 
 
@@ -100,7 +121,7 @@ The detail parameters of algorithms (A1~A12) shows in the paper.
 - [x] Redraw network structure
 - [x] Experimental comparison
 - [x] Ablation study
-- [ ] Prepare arXiv paper
+- [x] Prepare arXiv paper
 
 
 ## References
