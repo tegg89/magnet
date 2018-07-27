@@ -1,4 +1,4 @@
-# MAGNN: Deep learning Jeju camp 2018
+# MAGNet: Deep learning Jeju camp 2018
 
 * This project is currently under construction. 
 
@@ -23,7 +23,7 @@ For the experiment, we will use [Pommerman](https://www.pommerman.com) environme
 * The design of the network is shown below. 
 
 <p align="center">
-  <img src="https://github.com/tegg89/magnn/blob/master/asset/processing_results/paper/curr-network.png?raw=true" width=70% title="network">
+  <img src="https://github.com/tegg89/magnet/blob/master/asset/processing_results/paper/curr-network.png?raw=true" width=70% title="network">
 </p>
 
 
@@ -52,7 +52,7 @@ The script has been tested running under Python 3.6.6, with the following packag
 #### 2-1. Overall algorithm comparison
 
 <p align="center">
-  <img src="https://github.com/tegg89/magnn/blob/master/asset/processing_results/paper/comp-n-gs-nn.png?raw=true" width=70% title="results-overall">
+  <img src="https://github.com/tegg89/magnet/blob/master/asset/processing_results/paper/gs-nn.png?raw=true" width=70% title="results-overall">
 </p>
 
 * Top graph shows the performance of theproposed model and other RL algorithms. 
@@ -67,7 +67,7 @@ The script has been tested running under Python 3.6.6, with the following packag
 **Self-attention experiments**
 
 <p align="center">
-  <img src="https://github.com/tegg89/magnn/blob/master/asset/processing_results/paper/nn1-team-selfattn-n-teamagent-s-a.png?raw=true" width=80% title="results-sa">
+  <img src="https://github.com/tegg89/magnet/blob/master/asset/processing_results/paper/nn1-team-selfattn-n-teamagent-s-a.png?raw=true" width=80% title="results-sa">
 </p>
 
 * Left graph shows the effectiveness of self-attention module based on the shared graph. A1~A3 are vanilla networks without self-attention module, and A4 & A5 are models with the self-attention module. 
@@ -78,7 +78,7 @@ The script has been tested running under Python 3.6.6, with the following packag
 **Hyperparameter experiments**
 
 <p align="center">
-  <img src="https://github.com/tegg89/magnn/blob/master/asset/processing_results/paper/nn1-team-n-agent.png?raw=true" width=80% title="results-param">
+  <img src="https://github.com/tegg89/magnet/blob/master/asset/processing_results/paper/nn1-team-n-agent.png?raw=true" width=80% title="results-param">
 </p>
 
 * Left graph shows the experiment of self-attention in graph construction stage.
@@ -88,13 +88,13 @@ The script has been tested running under Python 3.6.6, with the following packag
 **Graph evaluations**
 
 <p align="center">
-  <img src="https://github.com/tegg89/magnn/blob/master/asset/processing_results/paper/graph-evaluation.png?raw=true" width=80% title="results-param">
+  <img src="https://github.com/tegg89/magnet/blob/master/asset/processing_results/paper/graph-evaluation.png?raw=true" width=80% title="results-param">
 </p>
 
 * We experimented with an effectiveness of shared and individual graphs. We set individual graphs per agents to the opposite side and take the shared graph to the allied side. As we training the model, the shared graph has better performance over separated ones.
 
 <p align="center">
-  <img src="https://github.com/tegg89/magnn/blob/master/asset/processing_results/paper/graph-vis.png?raw=true" width=80% title="results-param">
+  <img src="https://github.com/tegg89/magnet/blob/master/asset/processing_results/paper/graph-vis.png?raw=true" width=80% title="results-param">
 </p>
 
 * The visualizations of constructed graphs are shown in this result. The left graph shows the shared graph, whereas the right graph shows the separated graphs. 
