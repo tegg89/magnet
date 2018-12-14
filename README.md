@@ -1,11 +1,6 @@
-# MAGNet: Deep learning Jeju camp 2018
+# Deep Multi-Agent Reinforcement Learning with Relevance Graphs
 
-* This project is currently under construction. 
-
-
-## Authors
-
-Tegg Taekyong Sung & Aleksandra Malysheva
+Code for the [Deep Multi-Agent Reinforcement Learning with Relevance Graphs](https://arxiv.org/abs/1811.12557) accepted from NeurIPS Deep RL workshop. 
 
 
 ## Objective
@@ -23,7 +18,7 @@ For the experiment, we will use [Pommerman](https://www.pommerman.com) environme
 * The design of the network is shown below. 
 
 <p align="center">
-  <img src="https://github.com/tegg89/magnet/blob/master/asset/processing_results/paper/curr-network.png?raw=true" width=70% title="network">
+  <img src="https://github.com/tegg89/magnet/blob/master/asset/processing_results/paper/MAGNet.png?raw=true" width=50% title="network">
 </p>
 
 
@@ -49,52 +44,26 @@ The script has been tested running under Python 3.6.6, with the following packag
 
 ### 2. Results
 
-#### 2-1. Overall algorithm comparison
+#### 2-1. Algorithm comparisons
 
 <p align="center">
-  <img src="https://github.com/tegg89/magnet/blob/master/asset/processing_results/paper/gs-nn.png?raw=true" width=70% title="results-overall">
+  <img src="https://github.com/tegg89/magnet/blob/master/asset/processing_results/paper/gs-nn.png?raw=true" width=50% title="results-overall">
 </p>
 
-* Top graph shows the performance of theproposed model and other RL algorithms. 
+* Top graph shows the performance of the proposed model and other RL algorithms. 
 * Bottom graph shows the effectiveness of graph construction. 
 * Graph sharing within the team and individual graphs per agents are tested, and with the shared graph construction model gains the better performance.
 
-#### 2-2. Ablation studies
-
-(The detail parameters of algorithms (A1~A12) shows in the paper.)
-
-
-**Self-attention experiments**
+#### 2-2. Graph evaluations
 
 <p align="center">
-  <img src="https://github.com/tegg89/magnet/blob/master/asset/processing_results/paper/nn1-team-selfattn-n-teamagent-s-a.png?raw=true" width=80% title="results-sa">
-</p>
-
-* Left graph shows the effectiveness of self-attention module based on the shared graph. A1~A3 are vanilla networks without self-attention module, and A4 & A5 are models with the self-attention module. 
-* Right graph shows the self-attention tests based on individual graphs per agents. A10~A12 show the models with the self-attention module, and A13 shows the model without the module.
-* Also, the model with self-attention module has better performance on graph regression problem.
-
-
-**Hyperparameter experiments**
-
-<p align="center">
-  <img src="https://github.com/tegg89/magnet/blob/master/asset/processing_results/paper/nn1-team-n-agent.png?raw=true" width=80% title="results-param">
-</p>
-
-* Left graph shows the experiment of self-attention in graph construction stage.
-* Right graph shows the experiment of the way of constructing graph. A1~A3 refer to shared graph, and A10~A12 refer to individual graphs per agents.
-
-
-**Graph evaluations**
-
-<p align="center">
-  <img src="https://github.com/tegg89/magnet/blob/master/asset/processing_results/paper/graph-evaluation.png?raw=true" width=80% title="results-param">
+  <img src="https://github.com/tegg89/magnet/blob/master/asset/processing_results/paper/graph-evaluation.png?raw=true" width=50% title="results-param">
 </p>
 
 * We experimented with an effectiveness of shared and individual graphs. We set individual graphs per agents to the opposite side and take the shared graph to the allied side. As we training the model, the shared graph has better performance over separated ones.
 
 <p align="center">
-  <img src="https://github.com/tegg89/magnet/blob/master/asset/processing_results/paper/graph-vis.png?raw=true" width=80% title="results-param">
+  <img src="https://github.com/tegg89/magnet/blob/master/asset/processing_results/paper/visualgraph.png?raw=true" width=50% title="results-param">
 </p>
 
 * The visualizations of constructed graphs are shown in this result. The left graph shows the shared graph, whereas the right graph shows the separated graphs. 
@@ -102,28 +71,9 @@ The script has been tested running under Python 3.6.6, with the following packag
 * In the middle of the game (bottom), shared graph one shows the same team chases one of the opponent agents. In the separated graph, all agents are evenly chasing to each other.
 
 
-## TODO
+## Authors
 
-- [x] Attach self-attention module at the graph generation
-- [x] Substitute execution stage to NerveNet
-- [x] Redraw network structure
-- [x] Experimental comparison
-- [x] Ablation study
-- [x] Prepare arXiv paper
-
-
-## References
-
-* Graph Attention Networks [paper](https://arxiv.org/abs/1710.10903)
-* Relational Deep Reinforcement Learning [paper](https://arxiv.org/abs/1806.01830)
-* Nervenet: Learning structured policy with graph neural networks [paper](https://openreview.net/pdf?id=S1sqHMZCb)
-* Curiosity-driven exploration by self-supervised prediction [paper](https://arxiv.org/abs/1705.05363)
-* PlayGround: AI research into multi-agent learning [paper](https://github.com/MultiAgentLearning/playground)
-* Zero-shot task generalization with multi-task deep reinforcement learning [paper](https://arxiv.org/abs/1706.05064)
-* Gated graph sequence neural networks [paper](https://arxiv.org/abs/1511.05493)
-* Few-shot learning with graph neural networks [paper](https://arxiv.org/abs/1711.04043)
-* Backplay: ‘Man muss immer umkehren’ [paper](https://arxiv.org/abs/1807.06919)
-* Continuous control with deep reinforcement learning [paper](https://arxiv.org/abs/1509.02971)
+Tegg Taekyong Sung & Aleksandra Malysheva
 
 
 ## Acknowledgement
