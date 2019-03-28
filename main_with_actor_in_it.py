@@ -23,7 +23,7 @@ parser.add_argument('--random_seed', type=int, default=123, metavar='M',
                     help='random seed  (default: 123)')
 parser.add_argument('--env-name', default='PommeFFACompetition-v0', metavar='ENV',
                     help='environment to train on (default: PommeFFACompetition-v0)')
-parser.add_argument('--display', default=True, metavar='D',
+parser.add_argument('--display', default=False, metavar='D',
                     help='display the training environment.')
 parser.add_argument('--outdir', default="./output", help='Output log directory')
 
@@ -86,8 +86,8 @@ def main():
 
         while not done:
 
-            if args.display:
-                env.render()
+            # if args.display:
+            #     env.render()
 
             actions = env.act(state)
             state, reward, done, info = env.step(actions)

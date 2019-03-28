@@ -1,5 +1,9 @@
 from gym import Env
 
+import sys
+sys.path.insert(0, '../')
+from utils_for_game.utils import state_to_matrix_with_action
+
 OBSERVATION_SPASE = 38 * 11
 
 

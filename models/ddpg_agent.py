@@ -89,7 +89,7 @@ class DdpgAgent(agents.BaseAgent):
 
         self.prev_state = self.curr_state
         if self.pr_action is not None:
-            self.curr_state = env_processing.shaping.state_to_matrix_with_action(obs, action=self.pr_action)
+            self.curr_state = state_to_matrix_with_action(obs, action=self.pr_action)
 
         if self.prev_state is not None:
             curr_state = self.curr_state
@@ -113,7 +113,7 @@ class DdpgAgent(agents.BaseAgent):
 
             # Predict the estimator
             y_generator = self.estimator_nn1.predict(input_fn=pred_input_NN1)
-            graph_predictions =  np.asmatrix(list(itertools.islice(y_generator, prev_state_matrix.shape[0]))[0]['y'])
+            graph_predictions =  np.asmatrix(list(itertools.islice(y_generator, prev_state_matrix.shape[0]))[0])
             input_to_ddpg = np.concatenate([self.curr_state, graph_predictions], axis=1)
             print(input_to_ddpg.shape)
             # action = self.actor.predict(np.expand_dims(input_to_ddpg, 0))[0, 0]
